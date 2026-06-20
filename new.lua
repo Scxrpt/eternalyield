@@ -6727,7 +6727,7 @@ local TeleportCheck = false
 Players.LocalPlayer.OnTeleport:Connect(function(State)
 	if KeepInfYield and (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/new/ey.lua'))()")
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/new.lua'))()")
 	end
 end)
 
@@ -6796,27 +6796,27 @@ addcmd('discord', {'support', 'help'}, function(args, speaker)
 	end
 end)
 
-addcmd('keepIY', {}, function(args, speaker)
+addcmd('keepEY', {}, function(args, speaker)
 	if queueteleport then
 		KeepInfYield = true
-		notify('KeepIY','Infinite Yield will now run after you teleport')
+		notify('KeepEY','Eternal Yield will now run after you teleport')
 		updatesaves()
 	else
 		notify('Incompatible Exploit','Your exploit does not support this command (missing queue_on_teleport)')
 	end
 end)
 
-addcmd('unkeepIY', {}, function(args, speaker)
+addcmd('unkeepEY', {}, function(args, speaker)
 	if queueteleport then
 		KeepInfYield = false
-		notify('KeepIY','Infinite Yield will no longer run after you teleport')
+		notify('KeepEY','Eternal Yield will no longer run after you teleport')
 		updatesaves()
 	else
 		notify('Incompatible Exploit','Your exploit does not support this command (missing queue_on_teleport)')
 	end
 end)
 
-addcmd('togglekeepIY', {}, function(args, speaker)
+addcmd('togglekeepEY', {}, function(args, speaker)
 	if queueteleport then
 		KeepInfYield = not KeepInfYield
 		updatesaves()
