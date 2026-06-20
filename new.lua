@@ -13685,7 +13685,7 @@ end)
 if not isLegacyChat then
 	TextChatService.MessageReceived:Connect(function(message)
 		if message.TextSource and message.Status ~= Enum.TextChatMessageStatus.InvalidTextChannelPermissions then
-			local player = Players:GetPlayerIYUserId(message.TextSource.UserId)
+			local player = Players:GetPlayerByUserId(message.TextSource.UserId)
 			if not player then return end
 
 			if logsEnabled == true then
