@@ -13792,3 +13792,32 @@ task.spawn(function()
     IntroBackground:Destroy()
     minimizeHolder()
 end)
+
+local execName = "Unknown"
+if identifyexecutor then
+    local success, result = pcall(identifyexecutor)
+    if success and type(result) == "string" then
+        execName = result
+    end
+elseif getexecutorname then
+    local success, result = pcall(getexecutorname)
+    if success and type(result) == "string" then
+        execName = result
+    end
+end
+
+local function check(name)
+    return string.find(string.lower(execName), string.lower(name)) ~= nil
+end
+
+if check("Xeno") or check("Solara") then
+    notify("Executor Status", "Your executor may not support everything!")
+elseif check("Madium") or check("YubX") or check("Potassium") or check("Synapse Z") or check("Volt") or check("Cosmic") or check("Seliware") or check("Wave") then
+    notify("Executor Status", "Your executor is supported! " .. execName)
+elseif check("Velocity") or check("Sirhurt") then
+    notify("Executor Status", "Your executor may not support auto load when switching servers, behind that it is compatible.")
+elseif check("Delta") or check("Codex") or check("ArceusX") or check("Cryptic") or check("VegaX") or check("Vega X") then
+    notify("Executor Status", "Your executor is supported")
+else
+    notify("Executor Status", "Your executor is supported! " .. execName)
+end
