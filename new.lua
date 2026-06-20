@@ -1,4 +1,3 @@
--- this may have bugs, i used ctrl f to replace things so it may have affected some code (not useful but still) 
 -- enhanced version of infinite yield, free and open source, feel free to do changes, this is a new project so few things has been added, i will continue working on this project (Do not use this code, if you do, you will not receive the updates,pls use the loadstring version)
 if IY_LOADED and not _G.IY_DEBUG then
 	error("Eternal Yield is already running!", 0)
@@ -575,7 +574,7 @@ Title.BorderSizePixel = 0
 Title.Size = UDim2.new(0, 250, 0, 20)
 Title.Font = Enum.Font.SourceSans
 Title.TextSize = 18
-Title.Text = "Eternal Yield FE v" .. currentVersion
+Title.Text = "BETA Eternal Yield FE v" .. currentVersion
 
 do
 	local emoji = ({
@@ -8020,7 +8019,7 @@ addcmd('unguidelete',{'noguidelete'},function(args, speaker)
 end)
 
 local wasStayOpen = StayOpen
-addcmd('hideIY',{},function(args, speaker)
+addcmd('hideEY',{},function(args, speaker)
 	isHidden = true
 	wasStayOpen = StayOpen
 	if StayOpen == true then
@@ -8032,7 +8031,7 @@ addcmd('hideIY',{},function(args, speaker)
 	if not (args[1] and tostring(args[1]) == 'nonotify') then notify('IY Hidden','You can press the prefix key to access the command bar') end
 end)
 
-addcmd('showIY',{'unhideIY'},function(args, speaker)
+addcmd('showEY',{'unhideEY'},function(args, speaker)
 	isHidden = false
 	minimizeNum = -20
 	if wasStayOpen then
