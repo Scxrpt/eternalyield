@@ -4684,6 +4684,7 @@ CMDs[#CMDs + 1] = {NAME = 'guiscale [number]', DESC = 'Changes the size of the g
 CMDs[#CMDs + 1] = {NAME = 'console', DESC = 'Opens the Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'oldconsole', DESC = 'Loads an old-themed Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'explorer / dex', DESC = 'Opens DEX IY Moon'}
+CMDs[#CMDs + 1] = {NAME = 'unctest', DESC = 'Loads UNC Test for your executor'}
 CMDs[#CMDs + 1] = {NAME = 'cobalt / cspy', DESC = 'Opens Cobalt to intercept incoming and outgoing network traffic'}
 CMDs[#CMDs + 1] = {NAME = 'remotespy / rspy', DESC = 'Opens Simple Spy V3 to intercept remote calls from the client to the server'}
 CMDs[#CMDs + 1] = {NAME = 'audiologger / alogger', DESC = 'Opens Edges audio logger'}
@@ -4694,6 +4695,7 @@ CMDs[#CMDs + 1] = {NAME = 'rejoin / rj', DESC = 'Makes you rejoin the game'}
 CMDs[#CMDs + 1] = {NAME = 'autorejoin / autorj', DESC = 'Automatically rejoins the server if you get kicked/disconnected'}
 CMDs[#CMDs + 1] = {NAME = 'serverhop / shop', DESC = 'Teleports you to a different server'}
 CMDs[#CMDs + 1] = {NAME = 'gameteleport / gametp [place ID]', DESC = 'Joins a game IY ID'}
+CMDs[#CMDs + 1] = {NAME = 'adonisbypass / adob / bypassa', DESC = 'Bypasses Adonis Anticheat (if integrated in the game)'}
 CMDs[#CMDs + 1] = {NAME = 'antiidle / antiafk', DESC = 'Prevents the game from kicking you for being idle/afk'}
 CMDs[#CMDs + 1] = {NAME = 'datalimit [num]', DESC = 'Set outgoing KBPS limit'}
 CMDs[#CMDs + 1] = {NAME = 'replicationlag / backtrack [num]', DESC = 'Set IncomingReplicationLag'}
@@ -4726,6 +4728,7 @@ CMDs[#CMDs + 1] = {NAME = 'clientantiteleport / antiteleport (CLIENT)', DESC = '
 CMDs[#CMDs + 1] = {NAME = 'allowrejoin / allowrj [true/false] (CLIENT)', DESC = 'Changes if antiteleport allows you to rejoin or not'}
 CMDs[#CMDs + 1] = {NAME = 'cancelteleport / canceltp', DESC = 'Cancels teleports in progress'}
 CMDs[#CMDs + 1] = {NAME = 'volume / vol [0-10]', DESC = 'Adjusts your game volume on a scale of 0 to 10'}
+CMDs[#CMDs + 1] = {NAME = 'fpscap / fcap [num]', DESC = 'Allows you to bypass 240 FPS cap limit'}
 CMDs[#CMDs + 1] = {NAME = 'antilag / boostfps / lowgraphics', DESC = 'Lowers game quality to boost FPS'}
 CMDs[#CMDs + 1] = {NAME = 'record / rec', DESC = 'Starts Roblox recorder'}
 CMDs[#CMDs + 1] = {NAME = 'screenshot / scrnshot', DESC = 'Takes a screenshot'}
@@ -5070,8 +5073,9 @@ CMDs[#CMDs + 1] = {NAME = 'tpwalk / teleportwalk [num]', DESC = 'Teleports you t
 CMDs[#CMDs + 1] = {NAME = 'untpwalk / unteleportwalk', DESC = 'Undoes tpwalk / teleportwalk'}
 CMDs[#CMDs + 1] = {NAME = 'trip', DESC = 'Makes your character fall over'}
 CMDs[#CMDs + 1] = {NAME = 'wallwalk / walkonwalls', DESC = 'Walk on walls'}
-CMDs[#CMDs + 1] = {NAME = 'promptr6', DESC = 'Prompts the game to switch your rig type to R6'}
-CMDs[#CMDs + 1] = {NAME = 'promptr15', DESC = 'Prompts the game to switch your rig type to R15'}
+CMDs[#CMDs + 1] = {NAME = 'promptr6 / pr6', DESC = 'Prompts the game to switch your rig type to R6'}
+CMDs[#CMDs + 1] = {NAME = 'promptr15 / pr15', DESC = 'Prompts the game to switch your rig type to R15'}
+CMDs[#CMDs + 1] = {NAME = 'promptr63 / pr63', DESC = 'Prompts the game to switch your rig type to R63'}
 CMDs[#CMDs + 1] = {NAME = '', DESC = ''}
 CMDs[#CMDs + 1] = {NAME = 'animation / anim [ID] [speed]', DESC = 'Makes your character perform an animation (must be an animation on the marketplace or by roblox/stickmasterluke to replicate)'}
 CMDs[#CMDs + 1] = {NAME = 'emote / em [ID] [speed]', DESC = 'Makes your character perform an emote (must be on the marketplace or by roblox/stickmasterluke to replicate)'}
@@ -7207,6 +7211,53 @@ addcmd("serverhop", {"shop"}, function(args, speaker)
 	end
 end)
 
+addcmd('adonisbypass', {'adob', 'bypassa'}, function(args, speaker)
+    if not game:IsLoaded() then game.Loaded:Wait() end
+    local g = getinfo or debug.getinfo
+    local d = true
+    local h = {}
+    local x, y
+
+    pcall(function()
+        setthreadidentity(2)
+    end)
+
+    for i, v in getgc(true) do
+        if typeof(v) == "table" then
+            local a = rawget(v, "Detected")
+            local b = rawget(v, "Kill")
+            if typeof(a) == "function" and not x then
+                x = a
+                local o; o = hookfunction(x, function(c, f, n)
+                    if c ~= "_" then
+                        warn("bypassed" .. tostring(c) .. "" .. tostring(f))
+                    end
+                    return true
+                end)
+                table.insert(h, x)
+            end
+            if rawget(v, "Variables") and rawget(v, "Process") and typeof(b) == "function" and not y then
+                y = b
+                local o; o = hookfunction(y, function(f)
+                    warn("bypassed" .. tostring(f))
+                end)
+                table.insert(h, y)
+            end
+        end
+    end
+
+    local o; o = hookfunction(getrenv().debug.info, newcclosure(function(...)
+        local a, f = ...
+        if x and a == x then
+            warn("bypassed")
+            return coroutine.yield(coroutine.running())
+        end
+        return o(...)
+    end))
+
+    notify('Adonis Bypass', 'Bypassed Adonis (if exists)')
+end)
+
 addcmd("exit", {}, function(args, speaker)
 	game:Shutdown()
 end)
@@ -8167,6 +8218,16 @@ end)
 
 addcmd("volume",{ "vol"}, function(args, speaker)
 	UserSettings():GetService("UserGameSettings").MasterVolume = args[1]/10
+end)
+
+addcmd('fpscap', {'fcap'}, function(args, speaker)
+    local cap = tonumber(args[1]) or 60
+    if setfpscap then
+        pcall(setfpscap, cap)
+        notify('FPS Cap', 'FPS cap set to ' .. tostring(cap))
+    else
+        notify('Error', 'Your executor is missing setfpscap function')
+    end
 end)
 
 addcmd("antilag", {"boostfps", "lowgraphics"}, function(args, speaker)
@@ -9147,12 +9208,16 @@ promptNewRig = function(speaker, rig)
 	end
 end
 
-addcmd("promptr6", {}, function(args, speaker)
+addcmd("promptr6", {"pr6"}, function(args, speaker)
 	promptNewRig(speaker, "R6")
 end)
 
-addcmd("promptr15", {}, function(args, speaker)
+addcmd("promptr15", {"pr15"}, function(args, speaker)
 	promptNewRig(speaker, "R15")
+end)
+
+addcmd('promptr63', {'pr63'}, function(args, speaker)
+    game:GetService("Players").LocalPlayer:Kick("nahhhhhh son 🥀")
 end)
 
 addcmd("wallwalk", {"walkonwalls"}, function(args, speaker)
@@ -9247,7 +9312,7 @@ addcmd('copygroupname', {}, function()
             notify('Error', 'Failed to fetch group name')
         end
     else
-        notify('Error', 'This game is not owned IY a group')
+        notify('Error', 'This game is not owned by a group')
     end
 end)
 
@@ -9256,7 +9321,7 @@ addcmd('copygroupid', {}, function()
         setclipboard(tostring(game.CreatorId))
         notify('Success', 'Group ID copied')
     else
-        notify('Error', 'This game is not owned IY a group')
+        notify('Error', 'This game is not owned by a group')
     end
 end)
 
@@ -10873,6 +10938,11 @@ end)
 addcmd("explorer", {"dex"}, function(args, speaker)
 	notify("Loading", "Hold on a sec")
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+end)
+
+addcmd('unctest', {}, function(args, speaker)
+    notify('UNC Test', 'Hold on a sec')
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Scxrpt/UncTest-notbyMe/refs/heads/main/unctst.lua"))()
 end)
 
 addcmd("cobalt", {"cspy"}, function(args, speaker)
@@ -12883,7 +12953,7 @@ addcmd("staffwatch", {}, function(args, speaker)
 			notify("Staffwatch", "Enabled")
 		end
 	else
-		notify("Staffwatch", "Game is not owned IY a Group")
+		notify("Staffwatch", "Game is not owned by a Group")
 	end
 end)
 
@@ -13810,11 +13880,11 @@ local function check(name)
     return string.find(string.lower(execName), string.lower(name)) ~= nil
 end
 
-if check("Xeno") or check("Solara") then
+if check("Xeno") or check("Solara") or check("Hydrogen") then
     notify("Executor Status", "Your executor may not support everything!")
-elseif check("Madium") or check("YubX") or check("Potassium") or check("Synapse Z") or check("Volt") or check("Cosmic") or check("Seliware") or check("Wave") then
+elseif check("Madium") or check("YubX") or check("Potassium") or check("Synapse Z") or check("MacSploit") or check("Volt") or check("Cosmic") or check("Seliware") or check("Wave") then
     notify("Executor Status", "Your executor is supported! " .. execName)
-elseif check("Velocity") or check("Sirhurt") then
+elseif check("Velocity") or check("Sirhurt") or check ("Opiumware") then
     notify("Executor Status", "Your executor may not support auto load when switching servers, behind that it is compatible.")
 elseif check("Delta") or check("Codex") or check("ArceusX") or check("Cryptic") or check("VegaX") or check("Vega X") then
     notify("Executor Status", "Your executor is supported")
