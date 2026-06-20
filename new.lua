@@ -1,3 +1,4 @@
+-- this may have bugs, i used ctrl f to replace things so it may have affected some code (not useful but still) 
 -- enhanced version of infinite yield, free and open source, feel free to do changes, this is a new project so few things has been added, i will continue working on this project (Do not use this code, if you do, you will not receive the updates,pls use the loadstring version)
 if IY_LOADED and not _G.IY_DEBUG then
 	error("Eternal Yield is already running!", 0)
@@ -325,7 +326,7 @@ isLegacyChat = TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService
 end)) or false]]
 
 -- xylex & europa
-local IYassets = {
+local iyassets = {
 	["infiniteyield/assets/bindsandplugins.png"] = "rbxassetid://5147695474",
 	["infiniteyield/assets/close.png"] = "rbxassetid://5054663650",
 	["infiniteyield/assets/editaliases.png"] = "rbxassetid://5147488658",
@@ -349,7 +350,7 @@ local function getcustomasset(asset)
 			return result
 		end
 	end
-	return IYassets[asset]
+	return iyassets[asset]
 end
 
 if makefolder and isfolder and writefile and isfile then
@@ -360,7 +361,7 @@ if makefolder and isfolder and writefile and isfile then
 				makefolder(folder)
 			end
 		end
-		for path in IYassets do
+		for path in iyassets do
 			if not isfile(path) then
 				writefile(path, game:HttpGet((path:gsub("infiniteyield/", assets))))
 			end
@@ -574,7 +575,7 @@ Title.BorderSizePixel = 0
 Title.Size = UDim2.new(0, 250, 0, 20)
 Title.Font = Enum.Font.SourceSans
 Title.TextSize = 18
-Title.Text = "[NEW] Eternal Yield FE v" .. currentVersion
+Title.Text = "Eternal Yield FE v" .. currentVersion
 
 do
 	local emoji = ({
@@ -3272,7 +3273,7 @@ local loadedEventData = nil
 local jsonAttempts = 0
 function saves()
 	if writefileExploit() and readfileExploit() and jsonAttempts < 10 then
-		local readSuccess, out = readfile("IY_FE.IY", true)
+		local readSuccess, out = readfile("IY_FE.iy", true)
 		if readSuccess then
 			if out ~= nil and tostring(out):gsub("%s", "") ~= "" then
 				local success, response = pcall(function()
@@ -3302,14 +3303,14 @@ function saves()
 					jsonAttempts = jsonAttempts + 1
 					warn("Save Json Error:", response)
 					warn("Overwriting Save File")
-					writefile("IY_FE.IY", defaults, true)
+					writefile("IY_FE.iy", defaults, true)
 					wait()
 					saves()
 				end
 			else
-				writefile("IY_FE.IY", defaults, true)
+				writefile("IY_FE.iy", defaults, true)
 				wait()
-				local dReadSuccess, dOut = readfile("IY_FE.IY", true)
+				local dReadSuccess, dOut = readfile("IY_FE.iy", true)
 				if dReadSuccess and dOut ~= nil and tostring(dOut):gsub("%s", "") ~= "" then
 					saves()
 				else
@@ -3319,9 +3320,9 @@ function saves()
 				end
 			end
 		else
-			writefile("IY_FE.IY", defaults, true)
+			writefile("IY_FE.iy", defaults, true)
 			wait()
-			local dReadSuccess, dOut = readfile("IY_FE.IY", true)
+			local dReadSuccess, dOut = readfile("IY_FE.iy", true)
 			if dReadSuccess and dOut ~= nil and tostring(dOut):gsub("%s", "") ~= "" then
 				saves()
 			else
@@ -3367,7 +3368,7 @@ function updatesaves()
 			currentScroll = {currentScroll.R,currentScroll.G,currentScroll.B};
 			eventBinds = eventEditor.SaveData()
 		}
-		writefileCooldown("IY_FE.IY", HttpService:JSONEncode(update))
+		writefileCooldown("IY_FE.iy", HttpService:JSONEncode(update))
 	end
 end
 
@@ -5756,7 +5757,7 @@ function removeTableMatches(tab,matches)
 	return resultTable
 end
 
-function getPlayersIYName(Name)
+function getPlayersByName(Name)
 	local Name,Len,Found = string.lower(Name),#Name,{}
 	for _,v in pairs(Players:GetPlayers()) do
 		if Name:sub(0,1) == '@' then
@@ -5795,7 +5796,7 @@ function getPlayer(list,speaker)
 					end
 				end
 				if not foundCase then
-					initialPlayers = onlyIncludeInTable(initialPlayers,getPlayersIYName(tokenContent))
+					initialPlayers = onlyIncludeInTable(initialPlayers,getPlayersByName(tokenContent))
 				end
 			else
 				local tokenContent = v.Name
@@ -5808,7 +5809,7 @@ function getPlayer(list,speaker)
 					end
 				end
 				if not foundCase then
-					initialPlayers = removeTableMatches(initialPlayers,getPlayersIYName(tokenContent))
+					initialPlayers = removeTableMatches(initialPlayers,getPlayersByName(tokenContent))
 				end
 			end
 		end
@@ -6530,7 +6531,7 @@ end)
 PluginsGUI = PluginEditor.background
 
 function addPlugin(name)
-	if name:lower() == 'plugin file name' or name:lower() == 'IY_fe.IY' or name == 'IY_fe' then
+	if name:lower() == 'plugin file name' or name:lower() == 'IY_FE.iy' or name == 'IY_fe' then
 		notify('Plugin Error','Please enter a valid plugin')
 	else
 		local file
@@ -6775,7 +6776,7 @@ end)
 addcmd('discord', {'support', 'help'}, function(args, speaker)
 	if everyClipboard then
 		toClipboard('https://discord.com/invite/78ZuWSq')
-		notify('Discord Invite', 'Copied to clipboard!\ndiscord.gg/78ZuWSq')
+		notify('Discord Invite', 'Eternal Yield does not have a server, so here is IY server!\ndiscord.gg/78ZuWSq')
 	else
 		notify('Discord Invite', 'discord.gg/78ZuWSq')
 	end
@@ -7248,7 +7249,7 @@ end)
 
 FLYING = false
 QEfly = true
-IYflyspeed = 1
+iyflyspeed = 1
 vehicleflyspeed = 1
 function sFLY(vfly)
 	local plr = Players.LocalPlayer
@@ -7315,17 +7316,17 @@ function sFLY(vfly)
 	flyKeyDown = UserInputService.InputBegan:Connect(function(input, processed)
 		if processed then return end
 		if input.KeyCode == Enum.KeyCode.W then
-			CONTROL.F = (vfly and vehicleflyspeed or IYflyspeed)
+			CONTROL.F = (vfly and vehicleflyspeed or iyflyspeed)
 		elseif input.KeyCode == Enum.KeyCode.S then
-			CONTROL.B = - (vfly and vehicleflyspeed or IYflyspeed)
+			CONTROL.B = - (vfly and vehicleflyspeed or iyflyspeed)
 		elseif input.KeyCode == Enum.KeyCode.A then
-			CONTROL.L = - (vfly and vehicleflyspeed or IYflyspeed)
+			CONTROL.L = - (vfly and vehicleflyspeed or iyflyspeed)
 		elseif input.KeyCode == Enum.KeyCode.D then
-			CONTROL.R = (vfly and vehicleflyspeed or IYflyspeed)
+			CONTROL.R = (vfly and vehicleflyspeed or iyflyspeed)
 		elseif input.KeyCode == Enum.KeyCode.E and QEfly then
-			CONTROL.Q = (vfly and vehicleflyspeed or IYflyspeed)*2
+			CONTROL.Q = (vfly and vehicleflyspeed or iyflyspeed)*2
 		elseif input.KeyCode == Enum.KeyCode.Q and QEfly then
-			CONTROL.E = -(vfly and vehicleflyspeed or IYflyspeed)*2
+			CONTROL.E = -(vfly and vehicleflyspeed or iyflyspeed)*2
 		end
 		pcall(function() camera.CameraType = Enum.CameraType.Track end)
 	end)
@@ -7430,16 +7431,16 @@ local mobilefly = function(speaker, vfly)
 
 			local direction = controlModule:GetMoveVector()
 			if direction.X > 0 then
-				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * ((vfly and vehicleflyspeed or IYflyspeed) * 50))
+				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * ((vfly and vehicleflyspeed or iyflyspeed) * 50))
 			end
 			if direction.X < 0 then
-				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * ((vfly and vehicleflyspeed or IYflyspeed) * 50))
+				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * ((vfly and vehicleflyspeed or iyflyspeed) * 50))
 			end
 			if direction.Z > 0 then
-				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * ((vfly and vehicleflyspeed or IYflyspeed) * 50))
+				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * ((vfly and vehicleflyspeed or iyflyspeed) * 50))
 			end
 			if direction.Z < 0 then
-				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * ((vfly and vehicleflyspeed or IYflyspeed) * 50))
+				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * ((vfly and vehicleflyspeed or iyflyspeed) * 50))
 			end
 		end
 	end)
@@ -7454,14 +7455,14 @@ addcmd('fly',{},function(args, speaker)
 		mobilefly(speaker)
 	end
 	if args[1] and isNumber(args[1]) then
-		IYflyspeed = args[1]
+		iyflyspeed = args[1]
 	end
 end)
 
 addcmd('flyspeed',{'flysp'},function(args, speaker)
 	local speed = args[1] or 1
 	if isNumber(speed) then
-		IYflyspeed = speed
+		iyflyspeed = speed
 	end
 end)
 
@@ -13471,7 +13472,7 @@ addcmd("addallplugins", {"loadallplugins"}, function(args, speaker)
 		local fileName = filePath:match("([^/\\]+%.IY)$")
 
 		if fileName and
-			fileName:lower() ~= "IY_fe.IY" and
+			fileName:lower() ~= "IY_FE.iy" and
 			not isfolder(fileName) and
 			not table.find(PluginsTable, fileName)
 		then
@@ -13588,9 +13589,9 @@ function hookCharEvents(plr,instant)
 		humanoid.Died:Connect(function()
 			eventEditor.FireEvent("OnDied",plr.Name)
 
-			local killedIY = humanoid:FindFirstChild("creator")
-			if killedIY and killedIY.Value and killedIY.Value.Parent then
-				eventEditor.FireEvent("OnKilled",plr.Name,killedIY.Name)
+			local killedBy = humanoid:FindFirstChild("creator")
+			if killedBy and killedBy.Value and killedBy.Value.Parent then
+				eventEditor.FireEvent("OnKilled",plr.Name,killedBy.Name)
 			end
 		end)
 	end)
