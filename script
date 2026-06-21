@@ -31,6 +31,8 @@ end
 
 cleanupOldVersion()
 
+
+
 local originalVoidHeight = workspace.FallenPartsDestroyHeight
 local FakeChatSpamLoop = nil
 
@@ -4720,6 +4722,7 @@ CMDs[#CMDs + 1] = {NAME = 'serverinfo / info', DESC = 'Gives you info about the 
 CMDs[#CMDs + 1] = {NAME = 'jobid', DESC = 'Copies the games JobId to your clipboard'}
 CMDs[#CMDs + 1] = {NAME = 'notifyjobid', DESC = 'Notifies you the games JobId'}
 CMDs[#CMDs + 1] = {NAME = 'rejoin / rj', DESC = 'Makes you rejoin the game'}
+CMDs[#CMDs + 1] = {NAME = 'execute [code]', DESC = 'Executes the specified code'}
 CMDs[#CMDs + 1] = {NAME = 'print [text]', DESC = 'Prints the specified text to the developer console'}
 CMDs[#CMDs + 1] = {NAME = 'warn [text]', DESC = 'Outputs a yellow warning with the specified text to the developer console'}
 CMDs[#CMDs + 1] = {NAME = 'error [text]', DESC = 'Throws a red error with the specified text to the developer console'}
@@ -6775,7 +6778,7 @@ local TeleportCheck = false
 Players.LocalPlayer.OnTeleport:Connect(function(State)
 	if KeepInfYield and (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/script'))()")
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/script'))()")
 	end
 end)
 
@@ -7264,6 +7267,23 @@ addcmd("rejoin", {"rj"}, function(args, speaker)
 	else
 		TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
 	end
+end)
+
+addcmd("execute", {"exec", "run"}, function(args, speaker)
+    local code = getstring(1, args)
+    if code and code ~= "" then
+        local func, err = loadstring(code)
+        if func then
+            local success, runErr = pcall(func)
+            if not success then
+                notify("Execution Error", tostring(runErr))
+            end
+        else
+            notify("Syntax Error", tostring(err))
+        end
+    else
+        notify("Execute Command", "Please provide code to execute.")
+    end
 end)
 
 addcmd("autorejoin", {"autorj"}, function(args, speaker)
