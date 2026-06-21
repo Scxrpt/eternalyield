@@ -1,36 +1,7 @@
--- enhanced version of infinite yield, free and open source, feel free to do changes, this is a new project so few things has been added, i will continue working on this project (Do not use this code, if you do, you will not receive the updates,pls use the loadstring version)
-local function cleanupOldVersion()
-    local targets = {game:GetService("CoreGui"), game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui")}
-    if gethui then pcall(function() table.insert(targets, gethui()) end) end
-    if get_hidden_gui then pcall(function() table.insert(targets, get_hidden_gui()) end) end
-    
-    for _, container in ipairs(targets) do
-        if container then
-            for _, v in ipairs(container:GetDescendants()) do
-                if v:IsA("TextLabel") and string.find(v.Text, "Eternal Yield FE") then
-                    local holder = v.Parent
-                    if holder then
-                        local scaledHolder = holder.Parent
-                        if scaledHolder then
-                            local mainGui = scaledHolder.Parent
-                            if mainGui and mainGui:IsA("ScreenGui") and mainGui.Name ~= "RobloxGui" then
-                                mainGui:Destroy()
-                            else
-                                scaledHolder:Destroy()
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    getgenv().IY_LOADED = nil
-    getgenv().InfiniteYieldLoaded = nil
-    _G.IY_LOADED = nil
+if IY_LOADED and not _G.IY_DEBUG then
+	-- error("Infinite Yield is already running!", 0)
+	return
 end
-
-cleanupOldVersion()
-
 
 
 local originalVoidHeight = workspace.FallenPartsDestroyHeight
@@ -4751,7 +4722,6 @@ CMDs[#CMDs + 1] = {NAME = 'showEY / unhideEY', DESC = 'Shows EY again'}
 CMDs[#CMDs + 1] = {NAME = 'keepEY', DESC = 'Auto execute EY when you teleport through servers'}
 CMDs[#CMDs + 1] = {NAME = 'unkeepEY', DESC = 'Disable keepEY'}
 CMDs[#CMDs + 1] = {NAME = 'togglekeepEY', DESC = 'Toggles keepEY'}
-CMDs[#CMDs + 1] = {NAME = 'destroyEY', DESC = 'Destroys Eternal Yield'}
 CMDs[#CMDs + 1] = {NAME = 'removeads / adblock', DESC = 'Automatically removes ad billboards'}
 CMDs[#CMDs + 1] = {NAME = 'savegame / saveplace', DESC = 'Uses saveinstance to save the game'}
 CMDs[#CMDs + 1] = {NAME = 'clearerror', DESC = 'Clears the annoying box and blur when a game kicks you'}
@@ -6876,44 +6846,6 @@ addcmd('togglekeepEY', {}, function(args, speaker)
 	end
 end)
 
-addcmd('destroyEY', {'unloadEY', 'unloadEY'}, function(args, speaker)
-    TracersEnabled = false
-    BoxesEnabled = false
-    if ESPCache then
-        for plr, cache in pairs(ESPCache) do
-            if cache.Tracer then pcall(function() cache.Tracer:Remove() end) end
-            if cache.Box then pcall(function() cache.Box:Remove() end) end
-        end
-        ESPCache = {}
-    end
-    
-    getgenv().StretchedEnabled = false
-    if getgenv().KorbloxActive then
-        pcall(function() removeKorblox(Players.LocalPlayer.Character) end)
-    end
-
-    if antivoidloop then pcall(function() antivoidloop:Disconnect() end) antivoidloop = nil end
-    if brightLoop then pcall(function() brightLoop:Disconnect() end) brightLoop = nil end
-    if PromptButtonHoldBegan then pcall(function() PromptButtonHoldBegan:Disconnect() end) PromptButtonHoldBegan = nil end
-    if grabtoolsFunc then pcall(function() grabtoolsFunc:Disconnect() end) grabtoolsFunc = nil end
-    if cancelAutoClick then pcall(function() cancelAutoClick:Disconnect() end) cancelAutoClick = nil end
-    if cancelAutoKeyPress then pcall(function() cancelAutoKeyPress:Disconnect() end) cancelAutoKeyPress = nil end
-
-    if PARENT and PARENT.Name ~= "RobloxGui" then
-        pcall(function() PARENT:Destroy() end)
-    else
-        if ScaledHolder then pcall(function() ScaledHolder:Destroy() end) end
-        if logs then pcall(function() logs:Destroy() end) end
-        if KeybindEditor then pcall(function() KeybindEditor:Destroy() end) end
-        if PluginEditor then pcall(function() PluginEditor:Destroy() end) end
-        if ToPartFrame then pcall(function() ToPartFrame:Destroy() end) end
-        if AnnGUI then pcall(function() AnnGUI:Destroy() end) end
-    end
-
-    getgenv().IY_LOADED = nil
-    getgenv().InfiniteYieldLoaded = nil
-    _G.IY_LOADED = nil
-end)
 
 local canOpenServerinfo = true
 addcmd('serverinfo',{'info','sinfo'},function(args, speaker)
