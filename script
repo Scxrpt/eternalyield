@@ -369,7 +369,7 @@ if makefolder and isfolder and writefile and isfile then
 	end)
 end
 
-currentVersion = "6.4.1"
+currentVersion = "7.0"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -574,7 +574,7 @@ Title.BorderSizePixel = 0
 Title.Size = UDim2.new(0, 250, 0, 20)
 Title.Font = Enum.Font.SourceSans
 Title.TextSize = 18
-Title.Text = "BETA Eternal Yield FE v" .. currentVersion
+Title.Text = "Eternal Yield FE v" .. currentVersion
 
 do
 	local emoji = ({
@@ -4742,6 +4742,7 @@ CMDs[#CMDs + 1] = {NAME = 'render', DESC = 'Enable 3d Rendering'}
 CMDs[#CMDs + 1] = {NAME = 'use2022materials / 2022materials', DESC = 'Enables 2022 material textures'}
 CMDs[#CMDs + 1] = {NAME = 'unuse2022materials / un2022materials', DESC = 'Disables 2022 material textures'}
 CMDs[#CMDs + 1] = {NAME = 'alignmentkeys', DESC = 'Enables the left and right alignment keys (comma and period)'}
+CMDs[#CMDs + 1] = {NAME = 'dropkick', DESC = 'Gives you a dropkick script'}
 CMDs[#CMDs + 1] = {NAME = 'unalignmentkeys / noalignmentkeys', DESC = 'Disables the alignment keys'}
 CMDs[#CMDs + 1] = {NAME = 'ctrllock', DESC = 'Binds Shiftlock to LeftControl'}
 CMDs[#CMDs + 1] = {NAME = 'unctrllock', DESC = 'Re-binds Shiftlock to LeftShift'}
@@ -4761,6 +4762,7 @@ CMDs[#CMDs + 1] = {NAME = 'cframefly / cfly [speed]', DESC = 'Makes you fly, byp
 CMDs[#CMDs + 1] = {NAME = 'uncframefly / uncfly', DESC = 'Disables cfly'}
 CMDs[#CMDs + 1] = {NAME = 'cframeflyspeed  / cflyspeed [num]', DESC = 'Sets cfly speed'}
 CMDs[#CMDs + 1] = {NAME = 'qefly [true / false]', DESC = 'Enables or disables the Q and E hotkeys for fly'}
+CMDs[#CMDs + 1] = {NAME = 'flygui', DESC = 'Gives you a fly ui script'}
 CMDs[#CMDs + 1] = {NAME = 'vehiclenoclip / vnoclip', DESC = 'Turns off vehicle collision'}
 CMDs[#CMDs + 1] = {NAME = 'vehicleclip / vclip / unvnoclip', DESC = 'Enables vehicle collision'}
 CMDs[#CMDs + 1] = {NAME = 'float /  platform', DESC = 'Spawns a platform beneath you causing you to float'}
@@ -4924,10 +4926,8 @@ CMDs[#CMDs + 1] = {NAME = 'destroyheight / dh [num]', DESC = 'Sets FallenPartsDe
 CMDs[#CMDs + 1] = {NAME = 'fakeout', DESC = 'Tp to the void and then back (useful to kill people attached to you)'}
 CMDs[#CMDs + 1] = {NAME = 'antivoid', DESC = 'Prevents you from falling into the void by launching you upwards'}
 CMDs[#CMDs + 1] = {NAME = 'unantivoid / noantivoid', DESC = 'Disables antivoid'}
-CMDs[#CMDs + 1] = {NAME = 'enhancedantivoid', DESC = 'Better antivoid'}
-CMDs[#CMDs + 1] = {NAME = 'eav', DESC = 'Better antivoid'}
-CMDs[#CMDs + 1] = {NAME = 'unenhancedantivoid', DESC = 'Disables enhancedantivoid'}
-CMDs[#CMDs + 1] = {NAME = 'ueav', DESC = 'Disables enhancedantivoid'}
+CMDs[#CMDs + 1] = {NAME = 'enhancedantivoid / eav', DESC = 'Better antivoid'}
+CMDs[#CMDs + 1] = {NAME = 'unenhancedantivoid / ueav', DESC = 'Disables enhancedantivoid'}
 CMDs[#CMDs + 1] = {NAME = '', DESC = ''}
 CMDs[#CMDs + 1] = {NAME = 'fullbright / fb (CLIENT)', DESC = 'Makes the map brighter / more visible'}
 CMDs[#CMDs + 1] = {NAME = 'loopfullbright / loopfb (CLIENT)', DESC = 'Makes the map brighter / more visible but looped'}
@@ -7258,6 +7258,11 @@ addcmd('adonisbypass', {'adob', 'bypassa'}, function(args, speaker)
     notify('Adonis Bypass', 'Bypassed Adonis (if exists)')
 end)
 
+addcmd('dropkick', {}, function(args, speaker)
+    notify('Dropkick', 'Hold on a sec (may crash)')
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/Dropkick-NOTBYME.lua"))()
+end)
+
 addcmd("exit", {}, function(args, speaker)
 	game:Shutdown()
 end)
@@ -7554,6 +7559,11 @@ addcmd('qefly',{'flyqe'},function(args, speaker)
 	else
 		QEfly = true
 	end
+end)
+
+addcmd('flygui', {}, function(args, speaker)
+    notify('Fly Gui', 'Loaded')
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/FlyGui-NOTBYME.lua"))()
 end)
 
 addcmd('togglefly',{},function(args, speaker)
@@ -10941,8 +10951,8 @@ addcmd("explorer", {"dex"}, function(args, speaker)
 end)
 
 addcmd('unctest', {}, function(args, speaker)
-    notify('UNC Test', 'Hold on a sec')
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Scxrpt/UncTest-notbyMe/refs/heads/main/unctst.lua"))()
+    notify('UNC Test', 'Press F9 to check console')
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/UNCTest"))()
 end)
 
 addcmd("cobalt", {"cspy"}, function(args, speaker)
@@ -11901,7 +11911,7 @@ addcmd('touchinterests', {'touchinterest', 'firetouchinterests', 'firetouchinter
 	end
 end)
 
-addcmd('enhancedantivoid', {}, function()
+addcmd('enhancedantivoid', {"eav"}, function()
     if workspace.FallenPartsDestroyHeight == workspace.FallenPartsDestroyHeight then
         originalVoidHeight = workspace.FallenPartsDestroyHeight
     end
@@ -11909,24 +11919,8 @@ addcmd('enhancedantivoid', {}, function()
     notify('antivoid', 'Enhanced antivoid enabled')
 end)
 
-addcmd('eav', {}, function()
-    if workspace.FallenPartsDestroyHeight == workspace.FallenPartsDestroyHeight then
-        originalVoidHeight = workspace.FallenPartsDestroyHeight
-    end
-    workspace.FallenPartsDestroyHeight = 0/0
-    notify('antivoid', 'Enhanced antivoid enabled')
-end)
 
-addcmd('unenhancedantivoid', {}, function()
-    if originalVoidHeight == originalVoidHeight then
-        workspace.FallenPartsDestroyHeight = originalVoidHeight
-    else
-        workspace.FallenPartsDestroyHeight = -500
-    end
-    notify('antivoid', 'Enhanced antivoid disabled')
-end)
-
-addcmd('ueav', {}, function()
+addcmd('unenhancedantivoid', {"ueav"}, function()
     if originalVoidHeight == originalVoidHeight then
         workspace.FallenPartsDestroyHeight = originalVoidHeight
     else
@@ -13751,13 +13745,13 @@ end)
 
 task.spawn(function()
 	local success, latestVersionInfo = pcall(function() 
-		local versionJson = game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/version")
+		local versionJson = game:HttpGet("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/version.lua")
 		return HttpService:JSONDecode(versionJson)
 	end)
 
 	if success then
 		if currentVersion ~= latestVersionInfo.Version then
-			notify("Outdated", "Get the new version at infyiff.github.io")
+			notify("Outdated", "Get the new version at eternalyield.netlify.app")
 		end
 
 		if latestVersionInfo.Announcement and latestVersionInfo.Announcement ~= "" then
@@ -13882,7 +13876,7 @@ end
 
 if check("Xeno") or check("Solara") or check("Hydrogen") then
     notify("Executor Status", "Your executor may not support everything!")
-elseif check("Madium") or check("YubX") or check("Potassium") or check("Synapse Z") or check("MacSploit") or check("Volt") or check("Cosmic") or check("Seliware") or check("Wave") then
+elseif check("Madium") or check("YubX") or check("Potassium") or check("Synapse Z") or check("MacSploit") or check("Volt") or check("Cosmic") or check("Seliware") or check("Wave") or check("Real") or check("AWP") then
     notify("Executor Status", "Your executor is supported! " .. execName)
 elseif check("Velocity") or check("Sirhurt") or check ("Opiumware") then
     notify("Executor Status", "Your executor may not support auto load when switching servers, behind that it is compatible.")
