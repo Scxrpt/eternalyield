@@ -2,8 +2,9 @@
 
 An enhanced version of Infinite Yield with additional commands, improvements, and features.
 
-Script:
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/script"))()
+## Script
+[ loadstring(game:HttpGet("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/script"))() ]
+
 
 There is currently no discord server.
 
