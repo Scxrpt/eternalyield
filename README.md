@@ -17,10 +17,6 @@ There is currently no discord server.
 
 Original project: Infinite Yield by EdgeIY
 
-## Usage
-
-Refer to the wiki or documentation for command usage and features.
-
 ## Contributing
 
 External contributions are not being accepted at this time. If you'd like to make changes, feel free to fork the project and create your own version.
