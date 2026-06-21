@@ -26,4 +26,3 @@ External contributions are not being accepted at this time. If you'd like to mak
 
 Licensed under the MIT License. See the LICENSE file for details.
 
-(used ai for this readme)
