@@ -1,8 +1,35 @@
 -- enhanced version of infinite yield, free and open source, feel free to do changes, this is a new project so few things has been added, i will continue working on this project (Do not use this code, if you do, you will not receive the updates,pls use the loadstring version)
-if IY_LOADED and not _G.IY_DEBUG then
-	error("Eternal Yield is already running!", 0)
-	return
+local function cleanupOldVersion()
+    local targets = {game:GetService("CoreGui"), game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui")}
+    if gethui then pcall(function() table.insert(targets, gethui()) end) end
+    if get_hidden_gui then pcall(function() table.insert(targets, get_hidden_gui()) end) end
+    
+    for _, container in ipairs(targets) do
+        if container then
+            for _, v in ipairs(container:GetDescendants()) do
+                if v:IsA("TextLabel") and string.find(v.Text, "Eternal Yield FE") then
+                    local holder = v.Parent
+                    if holder then
+                        local scaledHolder = holder.Parent
+                        if scaledHolder then
+                            local mainGui = scaledHolder.Parent
+                            if mainGui and mainGui:IsA("ScreenGui") and mainGui.Name ~= "RobloxGui" then
+                                mainGui:Destroy()
+                            else
+                                scaledHolder:Destroy()
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    getgenv().IY_LOADED = nil
+    getgenv().InfiniteYieldLoaded = nil
+    _G.IY_LOADED = nil
 end
+
+cleanupOldVersion()
 
 local originalVoidHeight = workspace.FallenPartsDestroyHeight
 local FakeChatSpamLoop = nil
@@ -4721,6 +4748,7 @@ CMDs[#CMDs + 1] = {NAME = 'showEY / unhideEY', DESC = 'Shows EY again'}
 CMDs[#CMDs + 1] = {NAME = 'keepEY', DESC = 'Auto execute EY when you teleport through servers'}
 CMDs[#CMDs + 1] = {NAME = 'unkeepEY', DESC = 'Disable keepEY'}
 CMDs[#CMDs + 1] = {NAME = 'togglekeepEY', DESC = 'Toggles keepEY'}
+CMDs[#CMDs + 1] = {NAME = 'destroyEY', DESC = 'Destroys Eternal Yield'}
 CMDs[#CMDs + 1] = {NAME = 'removeads / adblock', DESC = 'Automatically removes ad billboards'}
 CMDs[#CMDs + 1] = {NAME = 'savegame / saveplace', DESC = 'Uses saveinstance to save the game'}
 CMDs[#CMDs + 1] = {NAME = 'clearerror', DESC = 'Clears the annoying box and blur when a game kicks you'}
@@ -4759,6 +4787,8 @@ CMDs[#CMDs + 1] = {NAME = 'unnoclip / clip', DESC = 'Disables noclip'}
 CMDs[#CMDs + 1] = {NAME = 'fly [speed]', DESC = 'Makes you fly'}
 CMDs[#CMDs + 1] = {NAME = 'unfly', DESC = 'Disables fly'}
 CMDs[#CMDs + 1] = {NAME = 'flyspeed [num]', DESC = 'Set fly speed (default is 20)'}
+CMDs[#CMDs + 1] = {NAME = 'upsidedown / ud', DESC = 'Flips your character upside down'}
+CMDs[#CMDs + 1] = {NAME = 'unupsidedown / unud', DESC = 'Flips your character back to normal'}
 CMDs[#CMDs + 1] = {NAME = 'vehiclefly / vfly [speed]', DESC = 'Makes you fly in a vehicle'}
 CMDs[#CMDs + 1] = {NAME = 'unvehiclefly / unvfly', DESC = 'Disables vehicle fly'}
 CMDs[#CMDs + 1] = {NAME = 'vehicleflyspeed  / vflyspeed [num]', DESC = 'Set vehicle fly speed'}
@@ -6843,6 +6873,45 @@ addcmd('togglekeepEY', {}, function(args, speaker)
 	end
 end)
 
+addcmd('destroyEY', {'unloadEY', 'unloadEY'}, function(args, speaker)
+    TracersEnabled = false
+    BoxesEnabled = false
+    if ESPCache then
+        for plr, cache in pairs(ESPCache) do
+            if cache.Tracer then pcall(function() cache.Tracer:Remove() end) end
+            if cache.Box then pcall(function() cache.Box:Remove() end) end
+        end
+        ESPCache = {}
+    end
+    
+    getgenv().StretchedEnabled = false
+    if getgenv().KorbloxActive then
+        pcall(function() removeKorblox(Players.LocalPlayer.Character) end)
+    end
+
+    if antivoidloop then pcall(function() antivoidloop:Disconnect() end) antivoidloop = nil end
+    if brightLoop then pcall(function() brightLoop:Disconnect() end) brightLoop = nil end
+    if PromptButtonHoldBegan then pcall(function() PromptButtonHoldBegan:Disconnect() end) PromptButtonHoldBegan = nil end
+    if grabtoolsFunc then pcall(function() grabtoolsFunc:Disconnect() end) grabtoolsFunc = nil end
+    if cancelAutoClick then pcall(function() cancelAutoClick:Disconnect() end) cancelAutoClick = nil end
+    if cancelAutoKeyPress then pcall(function() cancelAutoKeyPress:Disconnect() end) cancelAutoKeyPress = nil end
+
+    if PARENT and PARENT.Name ~= "RobloxGui" then
+        pcall(function() PARENT:Destroy() end)
+    else
+        if ScaledHolder then pcall(function() ScaledHolder:Destroy() end) end
+        if logs then pcall(function() logs:Destroy() end) end
+        if KeybindEditor then pcall(function() KeybindEditor:Destroy() end) end
+        if PluginEditor then pcall(function() PluginEditor:Destroy() end) end
+        if ToPartFrame then pcall(function() ToPartFrame:Destroy() end) end
+        if AnnGUI then pcall(function() AnnGUI:Destroy() end) end
+    end
+
+    getgenv().IY_LOADED = nil
+    getgenv().InfiniteYieldLoaded = nil
+    _G.IY_LOADED = nil
+end)
+
 local canOpenServerinfo = true
 addcmd('serverinfo',{'info','sinfo'},function(args, speaker)
 	if not canOpenServerinfo then return end
@@ -7533,6 +7602,35 @@ addcmd('flyspeed',{'flysp'},function(args, speaker)
 	if isNumber(speed) then
 		iyflyspeed = speed
 	end
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+if not getgenv().UD_OriginalC0s then
+    getgenv().UD_OriginalC0s = {}
+end
+
+addcmd('upsidedown', {'ud'}, function(args, speaker)
+    if LocalPlayer.Character then
+        local joint = LocalPlayer.Character:FindFirstChild("RootJoint", true)
+        if joint then
+            if not getgenv().UD_OriginalC0s[joint] then
+                getgenv().UD_OriginalC0s[joint] = joint.C0
+                joint.C0 = joint.C0 * CFrame.Angles(math.rad(180), 0, 0)
+            end
+        end
+    end
+end)
+
+addcmd('unupsidedown', {'unud'}, function(args, speaker)
+    if LocalPlayer.Character then
+        local joint = LocalPlayer.Character:FindFirstChild("RootJoint", true)
+        if joint and getgenv().UD_OriginalC0s[joint] then
+            joint.C0 = getgenv().UD_OriginalC0s[joint]
+            getgenv().UD_OriginalC0s[joint] = nil
+        end
+    end
 end)
 
 addcmd('unfly',{'nofly','novfly','unvehiclefly','novehiclefly','unvfly'},function(args, speaker)
@@ -13527,23 +13625,30 @@ addcmd("jerk", {}, function(args, speaker)
 end)
 
 addcmd("guiscale", {}, function(args, speaker)
-	if args[1] and isNumber(args[1]) then
-		local scale = tonumber(args[1])
-		if scale % 1 == 0 then scale = scale / 100 end
-		-- me when i divide and it explodes
-		if scale == 0.01 then scale = 1 end
-		if scale == 0.02 then scale = 2 end
+    if args[1] and isNumber(args[1]) then
+        local scale = tonumber(args[1])
+        if scale % 1 == 0 then scale = scale / 100 end
+        -- me when i divide and it explodes
+        if scale == 0.01 then scale = 1 end
+        if scale == 0.02 then scale = 2 end
 
-		if scale >= 0.4 and scale <= 2 then
-			guiScale = scale
-		end
-	else
-		guiScale = defaultGuiScale
-	end
+        if scale >= 0.4 and scale <= 2 then
+            guiScale = scale
+        end
+    else
+        guiScale = defaultGuiScale
+    end
 
-	Scale.Scale = math.max(Holder.AbsoluteSize.X / 1920, guiScale)
-	updatesaves()
+    Scale.Scale = math.max(Holder.AbsoluteSize.X / 1920, guiScale)
+    updatesaves()
 end)
+
+-- Auto runs on startup: 100 if on mobile, 160 if on PC
+if IsOnMobile then
+    execCmd("guiscale 100")
+else
+    execCmd("guiscale 160")
+end
 
 addcmd("muteallvoices", {"muteallvcs"}, function(args, speaker)
 	Services.VoiceChatInternal:SubscribePauseAll(true)
@@ -14163,3 +14268,4 @@ elseif check("Delta") or check("Codex") or check("ArceusX") or check("Cryptic") 
 else
     notify("Executor Status", "Your executor is supported! " .. execName)
 end
+notify('guiscale is automatically set to 160% for Pc,you can change with command guiscale [number]')
