@@ -4683,6 +4683,7 @@ CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Infi
 CMDs[#CMDs + 1] = {NAME = 'guiscale [number]', DESC = 'Changes the size of the gui. [number] accepts decimals and whole numbers. Min is 0.4 and Max is 2'}
 CMDs[#CMDs + 1] = {NAME = 'console', DESC = 'Opens the Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'oldconsole', DESC = 'Loads an old-themed Roblox console'}
+CMDs[#CMDs + 1] = {NAME = 'checkexecutor / cexec', DESC = 'Checks your current executor environment and displays its performance statistics'}
 CMDs[#CMDs + 1] = {NAME = 'explorer / dex', DESC = 'Opens DEX IY Moon'}
 CMDs[#CMDs + 1] = {NAME = 'unctest', DESC = 'Loads UNC Test for your executor'}
 CMDs[#CMDs + 1] = {NAME = 'cobalt / cspy', DESC = 'Opens Cobalt to intercept incoming and outgoing network traffic'}
@@ -4692,6 +4693,9 @@ CMDs[#CMDs + 1] = {NAME = 'serverinfo / info', DESC = 'Gives you info about the 
 CMDs[#CMDs + 1] = {NAME = 'jobid', DESC = 'Copies the games JobId to your clipboard'}
 CMDs[#CMDs + 1] = {NAME = 'notifyjobid', DESC = 'Notifies you the games JobId'}
 CMDs[#CMDs + 1] = {NAME = 'rejoin / rj', DESC = 'Makes you rejoin the game'}
+CMDs[#CMDs + 1] = {NAME = 'print [text]', DESC = 'Prints the specified text to the developer console'}
+CMDs[#CMDs + 1] = {NAME = 'warn [text]', DESC = 'Outputs a yellow warning with the specified text to the developer console'}
+CMDs[#CMDs + 1] = {NAME = 'error [text]', DESC = 'Throws a red error with the specified text to the developer console'}
 CMDs[#CMDs + 1] = {NAME = 'autorejoin / autorj', DESC = 'Automatically rejoins the server if you get kicked/disconnected'}
 CMDs[#CMDs + 1] = {NAME = 'serverhop / shop', DESC = 'Teleports you to a different server'}
 CMDs[#CMDs + 1] = {NAME = 'gameteleport / gametp [place ID]', DESC = 'Joins a game IY ID'}
@@ -4793,6 +4797,8 @@ CMDs[#CMDs + 1] = {NAME = 'pulsetp / ptp [player] [seconds]', DESC = 'Teleports 
 CMDs[#CMDs + 1] = {NAME = 'clientbring / cbring [player] (CLIENT)', DESC = 'Bring a player'}
 CMDs[#CMDs + 1] = {NAME = 'loopbring [player] [distance] [delay] (CLIENT)', DESC = 'Loop brings a player to you (useful for killing)'}
 CMDs[#CMDs + 1] = {NAME = 'unloopbring [player]', DESC = 'Undoes loopbring'}
+CMDs[#CMDs + 1] = {NAME = 'hide [plr]', DESC = 'Hides the specified player\'s avatar locally'}
+CMDs[#CMDs + 1] = {NAME = 'show [plr]', DESC = 'Shows the specified hidden player\'s avatar locally'}
 CMDs[#CMDs + 1] = {NAME = 'freeze / fr [player] (CLIENT)', DESC = 'Freezes a player'}
 CMDs[#CMDs + 1] = {NAME = 'freezeanims', DESC = 'Freezes your animations / pauses your animations - Does not work on default animations'}
 CMDs[#CMDs + 1] = {NAME = 'unfreezeanims', DESC = 'Unfreezes your animations / plays your animations'}
@@ -9756,6 +9762,39 @@ addcmd('freeze',{'fr'},function(args, speaker)
 	end
 end)
 
+local hiddenCharacters = {}
+
+local function getPlayer(str)
+    if not str then return end
+    for _, v in ipairs(game:GetService("Players"):GetPlayers()) do
+        if v.Name:lower():sub(1, #str) == str:lower() or v.DisplayName:lower():sub(1, #str) == str:lower() then
+            return v
+        end
+    end
+end
+
+addcmd('hide', {}, function(args, speaker)
+    local target = getPlayer(args[1])
+    if target and target.Character then
+        hiddenCharacters[target.UserId] = target.Character
+        target.Character.Parent = nil
+        notify("Hide", "Hidden " .. target.Name)
+    else
+        notify("Error", "Player not found")
+    end
+end)
+
+addcmd('show', {}, function(args, speaker)
+    local target = getPlayer(args[1])
+    if target and hiddenCharacters[target.UserId] then
+        hiddenCharacters[target.UserId].Parent = workspace
+        hiddenCharacters[target.UserId] = nil
+        notify("Show", "Showing " .. target.Name)
+    else
+        notify("Error", "Player is not hidden")
+    end
+end)
+
 
 addcmd('thaw',{'unfreeze','unfr'},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
@@ -10950,6 +10989,87 @@ addcmd('oldconsole',{},function(args, speaker)
 	notify('Console','Press F9 to open the console')
 end)
 
+addcmd('checkexecutor', {'cexec'}, function(args, speaker)
+    local execName = "Unknown"
+    if identifyexecutor then
+        execName = tostring(identifyexecutor()):lower()
+    end
+
+    local nameOut = "Unknown"
+    local sunc = "100% & 100%"
+    local multi = "True"
+    local raknet = "False"
+    local decomp = "True"
+
+    if string.find(execName, "synapse") or string.find(execName, "synz") then
+        nameOut = "Synapse Z (synz)"
+        sunc = "100% & 99%"
+        multi = "true"
+        raknet = "True"
+    elseif string.find(execName, "potassium") or string.find(execName, "psm") then
+        nameOut = "Potassium (psm)"
+        sunc = "100% & 99%"
+        raknet = "True"
+    elseif string.find(execName, "volt") or string.find(execName, "awp") then
+        nameOut = "Volt (awp.gg)"
+        sunc = "98% & 99%"
+        raknet = "True"
+        decomp = "False"
+    elseif string.find(execName, "madium") then
+        nameOut = "Madium"
+        sunc = "100% & 99%"
+        raknet = "True"
+    elseif string.find(execName, "macsploit") then
+        nameOut = "MacSploit"
+        sunc = "100% & 99%"
+        raknet = "True"
+    elseif string.find(execName, "opiumware") then
+        nameOut = "Opiumware"
+        sunc = "100% & 99%"
+        raknet = "True"
+    elseif string.find(execName, "seliware") then
+        nameOut = "Seliware"
+        sunc = "100% & 99%"
+        raknet = "True"
+    elseif string.find(execName, "wave") then
+        nameOut = "Wave"
+        sunc = "100% & 99%"
+    elseif string.find(execName, "cosmic") then
+        nameOut = "Cosmic"
+        sunc = "100% & 99%"
+    elseif string.find(execName, "xeno") then
+        nameOut = "Xeno"
+        sunc = "40% & 84%"
+    elseif string.find(execName, "solara") then
+        nameOut = "Solara"
+        sunc = "39% & 67 🥭%"
+    elseif string.find(execName, "velocity") or string.find(execName, "velo") then
+        nameOut = "Velocity (velo)"
+        sunc = "94% & 99%"
+    elseif string.find(execName, "sirhurt") then
+        nameOut = "SirHurt"
+        sunc = "94% & 99%"
+    elseif string.find(execName, "delta") then
+        nameOut = "Delta"
+        sunc = "100% & 99%"
+        raknet = "True"
+    elseif string.find(execName, "vega") then
+        nameOut = "Vega X"
+        sunc = "99% & 98%"
+    elseif string.find(execName, "codex") then
+        nameOut = "Codex"
+        sunc = "96% & 98%"
+    elseif string.find(execName, "cryptic") then
+        nameOut = "Cryptic"
+        sunc = "98% & 99%"
+    else
+        nameOut = identifyexecutor and identifyexecutor() or "Unknown"
+    end
+
+    local result = string.format("Name: %s\nsUNC: %s\nMulti Instance: %s\nRaknet: %s\nDecompiler: %s", nameOut, sunc, multi, raknet, decomp)
+    notify("Executor Check", result)
+end)
+
 addcmd("explorer", {"dex"}, function(args, speaker)
 	notify("Loading", "Hold on a sec")
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
@@ -11263,6 +11383,21 @@ function getTorso(x)
 	x = x or Players.LocalPlayer.Character
 	return x:FindFirstChild("Torso") or x:FindFirstChild("UpperTorso") or x:FindFirstChild("LowerTorso") or x:FindFirstChild("HumanoidRootPart")
 end
+
+addcmd('print', {}, function(args, speaker)
+    local text = table.concat(args, " ")
+    print(text)
+end)
+
+addcmd('warn', {}, function(args, speaker)
+    local text = table.concat(args, " ")
+    warn(text)
+end)
+
+addcmd('error', {}, function(args, speaker)
+    local text = table.concat(args, " ")
+    error(text)
+end)
 
 addcmd("bang", {"rape"}, function(args, speaker)
 	execCmd("unbang")
