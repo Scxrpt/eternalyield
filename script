@@ -4805,6 +4805,9 @@ CMDs[#CMDs + 1] = {NAME = 'unfreezeanims', DESC = 'Unfreezes your animations / p
 CMDs[#CMDs + 1] = {NAME = 'thaw / unfr [player] (CLIENT)', DESC = 'Unfreezes a player'}
 CMDs[#CMDs + 1] = {NAME = 'anchor', DESC = 'Anchors your characters RootPart'}
 CMDs[#CMDs + 1] = {NAME = 'unanchor', DESC = 'Unanchors your characters RootPart'}
+CMDs[#CMDs + 1] = {NAME = 'weld / backweld / bweld [player]', DESC = 'Weld 3 studs behind a player'}
+CMDs[#CMDs + 1] = {NAME = 'frontweld / fweld [player]', DESC = 'Weld 3 studs in front of a player facing them'}
+CMDs[#CMDs + 1] = {NAME = 'unweld / uweld / unfrontweld [player]', DESC = 'Stops welding and restores physics pointer'}
 CMDs[#CMDs + 1] = {NAME = 'tpposition / tppos [X Y Z]', DESC = 'Teleports you to certain coordinates'}
 CMDs[#CMDs + 1] = {NAME = 'tweentpposition / ttppos [X Y Z]', DESC = 'Tween to coordinates (bypasses some anti cheats)'}
 CMDs[#CMDs + 1] = {NAME = 'offset [X Y Z]', DESC = 'Offsets you to certain coordinates'}
@@ -9817,6 +9820,83 @@ end)
 
 addcmd("unanchor", {}, function(args, speaker)
     getRoot(speaker.Character).Anchored = false
+end)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local function find_target_player(input_text)
+    input_text = tostring(input_text or ""):lower()
+    if input_text == "" then return nil end
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local name_lower = player.Name:lower()
+            local display_lower = (player.DisplayName or player.Name):lower()
+            if name_lower:sub(1, #input_text) == input_text or display_lower:sub(1, #input_text) == input_text then
+                return player
+            end
+        end
+    end
+    return nil
+end
+
+if getgenv().IY_WeldLoop then
+    getgenv().IY_WeldLoop:Disconnect()
+    getgenv().IY_WeldLoop = nil
+end
+
+addcmd('backweld', {'bweld', 'weld'}, function(args, speaker)
+    local targetPlayer = find_target_player(args[1])
+    if targetPlayer then
+        if getgenv().IY_WeldLoop then getgenv().IY_WeldLoop:Disconnect() end
+        getgenv().IY_WeldLoop = RunService.Heartbeat:Connect(function()
+            if targetPlayer and targetPlayer.Character and LocalPlayer.Character then
+                local player_root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local target_root = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if player_root and target_root then
+                    player_root.CFrame = target_root.CFrame * CFrame.new(0, 0, 3)
+                    player_root.Velocity = Vector3.zero
+                    if sethiddenproperty then
+                        pcall(sethiddenproperty, player_root, "PhysicsRepRootPart", target_root)
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+addcmd('frontweld', {'fweld'}, function(args, speaker)
+    local targetPlayer = find_target_player(args[1])
+    if targetPlayer then
+        if getgenv().IY_WeldLoop then getgenv().IY_WeldLoop:Disconnect() end
+        getgenv().IY_WeldLoop = RunService.Heartbeat:Connect(function()
+            if targetPlayer and targetPlayer.Character and LocalPlayer.Character then
+                local player_root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local target_root = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if player_root and target_root then
+                    player_root.CFrame = target_root.CFrame * CFrame.new(0, 0, -3) * CFrame.Angles(0, math.pi, 0)
+                    player_root.Velocity = Vector3.zero
+                    if sethiddenproperty then
+                        pcall(sethiddenproperty, player_root, "PhysicsRepRootPart", target_root)
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+addcmd('unweld', {'uweld', 'unfrontweld'}, function(args, speaker)
+    if getgenv().IY_WeldLoop then
+        getgenv().IY_WeldLoop:Disconnect()
+        getgenv().IY_WeldLoop = nil
+    end
+    if LocalPlayer.Character then
+        local player_root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if player_root and sethiddenproperty then
+            pcall(sethiddenproperty, player_root, "PhysicsRepRootPart", player_root)
+        end
+    end
 end)
 
 oofing = false
