@@ -1,4 +1,3 @@
--- enhanced version of iy
 if IY_LOADED and not _G.IY_DEBUG then
 	-- error("Eternal Yield is already running!", 0)
 	return
@@ -4828,6 +4827,7 @@ CMDs[#CMDs + 1] = {NAME = 'nospawnpoint / nospawn', DESC = 'Removes your custom 
 CMDs[#CMDs + 1] = {NAME = 'flashback / diedtp', DESC = 'Teleports you to where you last died'}
 CMDs[#CMDs + 1] = {NAME = 'walltp', DESC = 'Teleports you above/over any wall you run into'}
 CMDs[#CMDs + 1] = {NAME = 'nowalltp / unwalltp', DESC = 'Disables walltp'}
+CMDs[#CMDs + 1] = {NAME = 'playerlist / plist', DESC = 'Opens the playerlist (does currently not contain all player commands on it)'}
 CMDs[#CMDs + 1] = {NAME = 'teleporttool / tptool', DESC = 'Gives you a teleport tool'}
 CMDs[#CMDs + 1] = {NAME = '', DESC = ''}
 CMDs[#CMDs + 1] = {NAME = 'logs', DESC = 'Opens the logs GUI'}
@@ -12516,6 +12516,446 @@ addcmd("joinlogs", {"jlogs"}, function(args, speaker)
 	logs:TweenPosition(UDim2.new(0, 0, 1, -265), "InOut", "Quart", 0.3, true, nil)
 end)
 
+addcmd('playerlist',{'plist'},function(args, speaker)
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local TweenService = game:GetService("TweenService")
+    local UserInputService = game:GetService("UserInputService")
+    local LocalPlayer = Players.LocalPlayer
+
+    -- Check if GUI already exists to toggle visibility instead of duplicating
+    local targetParent = nil
+    local coreGuiSuccess, coreGuiError = pcall(function()
+        targetParent = game:GetService("CoreGui"):FindFirstChild("RobloxGui") or game:GetService("CoreGui")
+    end)
+    if not coreGuiSuccess or not targetParent then
+        targetParent = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    end
+
+    local existingGui = targetParent:FindFirstChild("EternalYield_List")
+    if existingGui then
+        local mainFrame = existingGui:FindFirstChild("MainFrame")
+        if mainFrame then
+            mainFrame.Visible = not mainFrame.Visible
+        end
+        return
+    end
+
+    -- Persistent variables wrapped in the command's closure
+    local currentTarget = nil
+    local viewingPlayer = nil
+    local orbitingPlayer = nil
+    local orbitConnection = nil
+    local hiddenPlayers = {}
+    local hiddenConnections = {}
+
+    -- Create Elements
+    local EY_Gui = Instance.new("ScreenGui")
+    EY_Gui.Name = "EternalYield_List"
+    EY_Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    EY_Gui.ResetOnSpawn = false
+    EY_Gui.Parent = targetParent
+
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = EY_Gui
+    MainFrame.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    MainFrame.Size = UDim2.new(0, 300, 0, 400)
+    MainFrame.Visible = true
+
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Name = "TitleBar"
+    TitleBar.Parent = MainFrame
+    TitleBar.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Name = "TitleLabel"
+    TitleLabel.Parent = TitleBar
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+    TitleLabel.Size = UDim2.new(1, -40, 1, 0)
+    TitleLabel.Font = Enum.Font.SourceSansBold
+    TitleLabel.Text = "Eternal Yield FE Player List"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = 16
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Name = "CloseButton"
+    CloseButton.Parent = TitleBar
+    CloseButton.BackgroundTransparency = 1
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)
+    CloseButton.Size = UDim2.new(0, 30, 0, 30)
+    CloseButton.Font = Enum.Font.SourceSansBold
+    CloseButton.Text = "X"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 16
+
+    local SearchBar = Instance.new("TextBox")
+    SearchBar.Name = "SearchBar"
+    SearchBar.Parent = MainFrame
+    SearchBar.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    SearchBar.BorderSizePixel = 0
+    SearchBar.Position = UDim2.new(0, 5, 0, 35)
+    SearchBar.Size = UDim2.new(1, -10, 0, 25)
+    SearchBar.Font = Enum.Font.SourceSans
+    SearchBar.PlaceholderText = "Search players..."
+    SearchBar.Text = ""
+    SearchBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SearchBar.TextSize = 14
+
+    local Container = Instance.new("ScrollingFrame")
+    Container.Name = "Container"
+    Container.Parent = MainFrame
+    Container.BackgroundTransparency = 1
+    Container.Position = UDim2.new(0, 5, 0, 65)
+    Container.Size = UDim2.new(1, -10, 1, -70)
+    Container.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Container.ScrollBarThickness = 4
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = Container
+    UIListLayout.SortOrder = Enum.SortOrder.Name
+    UIListLayout.Padding = UDim.new(0, 4)
+
+    local ActionMenu = Instance.new("Frame")
+    ActionMenu.Name = "ActionMenu"
+    ActionMenu.Parent = EY_Gui
+    ActionMenu.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    ActionMenu.BorderSizePixel = 0
+    ActionMenu.Size = UDim2.new(0, 130, 0, 175)
+    ActionMenu.Visible = false
+
+    local MenuList = Instance.new("UIListLayout")
+    MenuList.Parent = ActionMenu
+    MenuList.SortOrder = Enum.SortOrder.LayoutOrder
+    MenuList.Padding = UDim.new(0, 0)
+
+    local function createMenuBtn(name, text, order)
+        local btn = Instance.new("TextButton")
+        btn.Name = name
+        btn.Parent = ActionMenu
+        btn.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+        btn.BorderSizePixel = 0
+        btn.Size = UDim2.new(1, 0, 0, 25)
+        btn.Font = Enum.Font.SourceSans
+        btn.Text = text
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 14
+        btn.LayoutOrder = order
+        
+        btn.MouseEnter:Connect(function()
+            btn.BackgroundColor3 = Color3.fromRGB(56, 56, 57)
+        end)
+        btn.MouseLeave:Connect(function()
+            btn.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+        end)
+        return btn
+    end
+
+    local ViewBtn = createMenuBtn("ViewBtn", "View", 1)
+    local TPBtn = createMenuBtn("TPBtn", "Teleport", 2)
+    local OrbitBtn = createMenuBtn("OrbitBtn", "Orbit", 3)
+    local CopyIDBtn = createMenuBtn("CopyIDBtn", "Copy UserID", 4)
+    local CopyUserBtn = createMenuBtn("CopyUserBtn", "Copy Username", 5)
+    local CopyDisplayBtn = createMenuBtn("CopyDisplayBtn", "Copy Display", 6)
+    local HideBtn = createMenuBtn("HideBtn", "Hide", 7)
+
+    -- Dragging
+    local dragging, dragInput, dragStart, startPos
+    TitleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    TitleBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    CloseButton.MouseButton1Click:Connect(function()
+        MainFrame.Visible = false
+        ActionMenu.Visible = false
+    end)
+
+    local function getClipboardFunction()
+        if setclipboard then return setclipboard end
+        if toclipboard then return toclipboard end
+        if syn and syn.write_clipboard then return syn.write_clipboard end
+        return nil
+    end
+
+    local function applyHide(player)
+        if not player or not player.Character then return end
+        for _, part in ipairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                part.Transparency = 1
+            end
+        end
+    end
+
+    local function removeHide(player)
+        if not player or not player.Character then return end
+        for _, part in ipairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                if part.Name == "HumanoidRootPart" then
+                    part.Transparency = 1
+                else
+                    part.Transparency = 0
+                end
+            end
+        end
+    end
+
+    RunService.RenderStepped:Connect(function()
+        for plr, _ in pairs(hiddenPlayers) do
+            if plr and plr.Character then
+                applyHide(plr)
+            end
+        end
+        if viewingPlayer then
+            if viewingPlayer.Character and viewingPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                workspace.CurrentCamera.CameraSubject = viewingPlayer.Character:FindFirstChildOfClass("Humanoid")
+            end
+        end
+    end)
+
+    local function updatePlayerList()
+        for _, child in ipairs(Container:GetChildren()) do
+            if child:IsA("Frame") then child:Destroy() end
+        end
+        
+        local searchText = string.lower(SearchBar.Text)
+        
+        for _, player in ipairs(Players:GetPlayers()) do
+            local userName = player.Name
+            local displayName = player.DisplayName
+            
+            if searchText == "" or string.find(string.lower(userName), searchText) or string.find(string.lower(displayName), searchText) then
+                local Entry = Instance.new("Frame")
+                local Headshot = Instance.new("ImageLabel")
+                local InfoLabel = Instance.new("TextLabel")
+                local ClickBtn = Instance.new("TextButton")
+                
+                Entry.Name = userName
+                Entry.Parent = Container
+                Entry.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+                Entry.BorderSizePixel = 0
+                Entry.Size = UDim2.new(1, 0, 0, 45)
+                
+                Headshot.Name = "Headshot"
+                Headshot.Parent = Entry
+                Headshot.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
+                Headshot.BorderSizePixel = 0
+                Headshot.Position = UDim2.new(0, 5, 0, 2)
+                Headshot.Size = UDim2.new(0, 41, 0, 41)
+                
+                task.spawn(function()
+                    local thumbType = Enum.ThumbnailType.HeadShot
+                    local thumbSize = Enum.ThumbnailSize.Size48x48
+                    local content, isReady = Players:GetUserThumbnailAsync(player.UserId, thumbType, thumbSize)
+                    if isReady then
+                        Headshot.Image = content
+                    end
+                end)
+                
+                InfoLabel.Name = "InfoLabel"
+                InfoLabel.Parent = Entry
+                InfoLabel.BackgroundTransparency = 1
+                InfoLabel.Position = UDim2.new(0, 55, 0, 0)
+                InfoLabel.Size = UDim2.new(1, -60, 1, 0)
+                InfoLabel.Font = Enum.Font.SourceSans
+                InfoLabel.Text = displayName .. "\n@" .. userName
+                InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                InfoLabel.TextSize = 14
+                InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+                
+                ClickBtn.Name = "ClickBtn"
+                ClickBtn.Parent = Entry
+                ClickBtn.BackgroundTransparency = 1
+                ClickBtn.Size = UDim2.new(1, 0, 1, 0)
+                ClickBtn.Text = ""
+                
+                ClickBtn.MouseButton1Click:Connect(function()
+                    currentTarget = player
+                    if hiddenPlayers[player] then
+                        HideBtn.Text = "Show"
+                    else
+                        HideBtn.Text = "Hide"
+                    end
+                    
+                    if viewingPlayer == player then
+                        ViewBtn.Text = "Unview"
+                    else
+                        ViewBtn.Text = "View"
+                    end
+                    
+                    if orbitingPlayer == player then
+                        OrbitBtn.Text = "Unorbit"
+                    else
+                        OrbitBtn.Text = "Orbit"
+                    end
+                    
+                    local mousePos = UserInputService:GetMouseLocation()
+                    ActionMenu.Position = UDim2.new(0, mousePos.X, 0, mousePos.Y - 36)
+                    ActionMenu.Visible = true
+                end)
+                
+                Entry.MouseEnter:Connect(function()
+                    Entry.BackgroundColor3 = Color3.fromRGB(56, 56, 57)
+                end)
+                Entry.MouseLeave:Connect(function()
+                    Entry.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+                end)
+            end
+        end
+        
+        local numItems = #Container:GetChildren() - 1
+        Container.CanvasSize = UDim2.new(0, 0, 0, numItems * 49)
+    end
+
+    SearchBar.Changed:Connect(function(prop)
+        if prop == "Text" then
+            updatePlayerList()
+        end
+    end)
+
+    Players.PlayerAdded:Connect(updatePlayerList)
+    Players.PlayerRemoving:Connect(function(player)
+        if currentTarget == player then ActionMenu.Visible = false end
+        if viewingPlayer == player then viewingPlayer = nil workspace.CurrentCamera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid") end
+        if orbitingPlayer == player then if orbitConnection then orbitConnection:Disconnect() orbitConnection = nil end orbitingPlayer = nil end
+        hiddenPlayers[player] = nil
+        if hiddenConnections[player] then hiddenConnections[player]:Disconnect() hiddenConnections[player] = nil end
+        updatePlayerList()
+    end)
+
+    UserInputService.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if ActionMenu.Visible then
+                local menuPos = ActionMenu.AbsolutePosition
+                local menuSize = ActionMenu.AbsoluteSize
+                local mousePos = UserInputService:GetMouseLocation()
+                if mousePos.X < menuPos.X or mousePos.X > menuPos.X + menuSize.X or mousePos.Y < menuPos.Y or mousePos.Y > menuPos.Y + menuSize.Y then
+                    ActionMenu.Visible = false
+                end
+            end
+        end
+    end)
+
+    ViewBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        if viewingPlayer == currentTarget then
+            viewingPlayer = nil
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                workspace.CurrentCamera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            end
+        else
+            viewingPlayer = currentTarget
+        end
+    end)
+
+    TPBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget or not currentTarget.Character then return end
+        local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local targetRoot = currentTarget.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot and targetRoot then
+            myRoot.CFrame = targetRoot.CFrame
+        end
+    end)
+
+    OrbitBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        if orbitingPlayer == currentTarget then
+            if orbitConnection then orbitConnection:Disconnect() orbitConnection = nil end
+            orbitingPlayer = nil
+        else
+            if orbitConnection then orbitConnection:Disconnect() orbitConnection = nil end
+            orbitingPlayer = currentTarget
+            local angle = 0
+            orbitConnection = RunService.Heartbeat:Connect(function()
+                if not orbitingPlayer or not orbitingPlayer.Character then
+                    if orbitConnection then orbitConnection:Disconnect() orbitConnection = nil end
+                    orbitingPlayer = nil
+                    return
+                end
+                local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local targetRoot = orbitingPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if myRoot and targetRoot then
+                    angle = angle + 0.05
+                    local offset = Vector3.new(math.sin(angle) * 5, 0, math.cos(angle) * 5)
+                    myRoot.CFrame = CFrame.new(targetRoot.Position + offset, targetRoot.Position)
+                end
+            end)
+        end
+    end)
+
+    CopyIDBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        local clip = getClipboardFunction()
+        if clip then clip(tostring(currentTarget.UserId)) end
+    end)
+
+    CopyUserBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        local clip = getClipboardFunction()
+        if clip then clip(currentTarget.Name) end
+    end)
+
+    CopyDisplayBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        local clip = getClipboardFunction()
+        if clip then clip(currentTarget.DisplayName) end
+    end)
+
+    HideBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        if hiddenPlayers[currentTarget] then
+            hiddenPlayers[currentTarget] = nil
+            removeHide(currentTarget)
+            if hiddenConnections[currentTarget] then
+                hiddenConnections[currentTarget]:Disconnect()
+                hiddenConnections[currentTarget] = nil
+            end
+        else
+            hiddenPlayers[currentTarget] = true
+            applyHide(currentTarget)
+            hiddenConnections[currentTarget] = currentTarget.CharacterAdded:Connect(function(char)
+                applyHide(currentTarget)
+            end)
+        end
+    end)
+
+    updatePlayerList()
+end)
+
 addcmd("chatlogswebhook", {"logswebhook"}, function(args, speaker)
 	if not httprequest then
 		return notify("Incompatible Exploit", "Your exploit does not support this command (missing request)")
@@ -12995,6 +13435,442 @@ addcmd('unwalltp',{'nowalltp'},function(args, speaker)
 	if walltpTouch then
 		walltpTouch:Disconnect()
 	end
+end)
+
+addcmd('playerlist',{'plist'},function(args, speaker)
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local TweenService = game:GetService("TweenService")
+    local UserInputService = game:GetService("UserInputService")
+    local LocalPlayer = Players.LocalPlayer
+
+    local targetParent = nil
+    local coreGuiSuccess, coreGuiError = pcall(function()
+        targetParent = game:GetService("CoreGui"):FindFirstChild("RobloxGui") or game:GetService("CoreGui")
+    end)
+    if not coreGuiSuccess or not targetParent then
+        targetParent = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    end
+
+    local existingGui = targetParent:FindFirstChild("Eternal Yield FE Player List")
+    if existingGui then
+        local mainFrame = existingGui:FindFirstChild("MainFrame")
+        if mainFrame then
+            mainFrame.Visible = not mainFrame.Visible
+        end
+        return
+    end
+
+    local currentTarget = nil
+    local viewingPlayer = nil
+    local orbitingPlayer = nil
+    local orbitConnection = nil
+    local hiddenPlayers = {}
+    local hiddenConnections = {}
+
+    local EY_Gui = Instance.new("ScreenGui")
+    EY_Gui.Name = "Eternal Yield FE Player List"
+    EY_Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    EY_Gui.ResetOnSpawn = false
+    EY_Gui.Parent = targetParent
+
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = EY_Gui
+    MainFrame.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    MainFrame.Size = UDim2.new(0, 300, 0, 400)
+    MainFrame.Visible = true
+
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Name = "TitleBar"
+    TitleBar.Parent = MainFrame
+    TitleBar.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Name = "TitleLabel"
+    TitleLabel.Parent = TitleBar
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+    TitleLabel.Size = UDim2.new(1, -40, 1, 0)
+    TitleLabel.Font = Enum.Font.SourceSansBold
+    TitleLabel.Text = "Eternal Yield FE Player List"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = 16
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Name = "CloseButton"
+    CloseButton.Parent = TitleBar
+    CloseButton.BackgroundTransparency = 1
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)
+    CloseButton.Size = UDim2.new(0, 30, 0, 30)
+    CloseButton.Font = Enum.Font.SourceSansBold
+    CloseButton.Text = "X"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 16
+
+    local SearchBar = Instance.new("TextBox")
+    SearchBar.Name = "SearchBar"
+    SearchBar.Parent = MainFrame
+    SearchBar.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    SearchBar.BorderSizePixel = 0
+    SearchBar.Position = UDim2.new(0, 5, 0, 35)
+    SearchBar.Size = UDim2.new(1, -10, 0, 25)
+    SearchBar.Font = Enum.Font.SourceSans
+    SearchBar.PlaceholderText = "Search players..."
+    SearchBar.Text = ""
+    SearchBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SearchBar.TextSize = 14
+
+    local Container = Instance.new("ScrollingFrame")
+    Container.Name = "Container"
+    Container.Parent = MainFrame
+    Container.BackgroundTransparency = 1
+    Container.Position = UDim2.new(0, 5, 0, 65)
+    Container.Size = UDim2.new(1, -10, 1, -70)
+    Container.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Container.ScrollBarThickness = 4
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = Container
+    UIListLayout.SortOrder = Enum.SortOrder.Name
+    UIListLayout.Padding = UDim.new(0, 4)
+
+    local ActionMenu = Instance.new("Frame")
+    ActionMenu.Name = "ActionMenu"
+    ActionMenu.Parent = EY_Gui
+    ActionMenu.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    ActionMenu.BorderSizePixel = 0
+    ActionMenu.Size = UDim2.new(0, 130, 0, 175)
+    ActionMenu.Visible = false
+
+    local MenuList = Instance.new("UIListLayout")
+    MenuList.Parent = ActionMenu
+    MenuList.SortOrder = Enum.SortOrder.LayoutOrder
+    MenuList.Padding = UDim.new(0, 0)
+
+    local function createMenuBtn(name, text, order)
+        local btn = Instance.new("TextButton")
+        btn.Name = name
+        btn.Parent = ActionMenu
+        btn.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+        btn.BorderSizePixel = 0
+        btn.Size = UDim2.new(1, 0, 0, 25)
+        btn.Font = Enum.Font.SourceSans
+        btn.Text = text
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 14
+        btn.LayoutOrder = order
+        
+        btn.MouseEnter:Connect(function()
+            btn.BackgroundColor3 = Color3.fromRGB(56, 56, 57)
+        end)
+        btn.MouseLeave:Connect(function()
+            btn.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+        end)
+        return btn
+    end
+
+    local ViewBtn = createMenuBtn("ViewBtn", "View", 1)
+    local TPBtn = createMenuBtn("TPBtn", "Teleport", 2)
+    local OrbitBtn = createMenuBtn("OrbitBtn", "Orbit", 3)
+    local CopyIDBtn = createMenuBtn("CopyIDBtn", "Copy UserID", 4)
+    local CopyUserBtn = createMenuBtn("CopyUserBtn", "Copy Username", 5)
+    local CopyDisplayBtn = createMenuBtn("CopyDisplayBtn", "Copy Display", 6)
+    local HideBtn = createMenuBtn("HideBtn", "Hide", 7)
+
+    local dragging, dragInput, dragStart, startPos
+    TitleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    TitleBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    CloseButton.MouseButton1Click:Connect(function()
+        MainFrame.Visible = false
+        ActionMenu.Visible = false
+    end)
+
+    local function getClipboardFunction()
+        if setclipboard then return setclipboard end
+        if toclipboard then return toclipboard end
+        if syn and syn.write_clipboard then return syn.write_clipboard end
+        return nil
+    end
+
+    local function applyHide(player)
+        if not player or not player.Character then return end
+        for _, part in ipairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                part.Transparency = 1
+            end
+        end
+    end
+
+    local function removeHide(player)
+        if not player or not player.Character then return end
+        for _, part in ipairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                if part.Name == "HumanoidRootPart" then
+                    part.Transparency = 1
+                else
+                    part.Transparency = 0
+                end
+            end
+        end
+    end
+
+    RunService.RenderStepped:Connect(function()
+        for plr, _ in pairs(hiddenPlayers) do
+            if plr and plr.Character then
+                applyHide(plr)
+            end
+        end
+        if viewingPlayer then
+            if viewingPlayer.Character and viewingPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                workspace.CurrentCamera.CameraSubject = viewingPlayer.Character:FindFirstChildOfClass("Humanoid")
+            end
+        end
+    end)
+
+    local function updatePlayerList()
+        for _, child in ipairs(Container:GetChildren()) do
+            if child:IsA("Frame") then child:Destroy() end
+        end
+        
+        local searchText = string.lower(SearchBar.Text)
+        
+        for _, player in ipairs(Players:GetPlayers()) do
+            local userName = player.Name
+            local displayName = player.DisplayName
+            
+            if searchText == "" or string.find(string.lower(userName), searchText) or string.find(string.lower(displayName), searchText) then
+                local Entry = Instance.new("Frame")
+                local Headshot = Instance.new("ImageLabel")
+                local InfoLabel = Instance.new("TextLabel")
+                local ClickBtn = Instance.new("TextButton")
+                
+                Entry.Name = userName
+                Entry.Parent = Container
+                Entry.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+                Entry.BorderSizePixel = 0
+                Entry.Size = UDim2.new(1, 0, 0, 45)
+                
+                Headshot.Name = "Headshot"
+                Headshot.Parent = Entry
+                Headshot.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
+                Headshot.BorderSizePixel = 0
+                Headshot.Position = UDim2.new(0, 5, 0, 2)
+                Headshot.Size = UDim2.new(0, 41, 0, 41)
+                
+                task.spawn(function()
+                    local thumbType = Enum.ThumbnailType.HeadShot
+                    local thumbSize = Enum.ThumbnailSize.Size48x48
+                    local content, isReady = Players:GetUserThumbnailAsync(player.UserId, thumbType, thumbSize)
+                    if isReady then
+                        Headshot.Image = content
+                    end
+                end)
+                
+                InfoLabel.Name = "InfoLabel"
+                InfoLabel.Parent = Entry
+                InfoLabel.BackgroundTransparency = 1
+                InfoLabel.Position = UDim2.new(0, 55, 0, 0)
+                InfoLabel.Size = UDim2.new(1, -60, 1, 0)
+                InfoLabel.Font = Enum.Font.SourceSans
+                InfoLabel.Text = displayName .. "\n@" .. userName
+                InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                InfoLabel.TextSize = 14
+                InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+                
+                ClickBtn.Name = "ClickBtn"
+                ClickBtn.Parent = Entry
+                ClickBtn.BackgroundTransparency = 1
+                ClickBtn.Size = UDim2.new(1, 0, 1, 0)
+                ClickBtn.Text = ""
+                
+                ClickBtn.MouseButton1Click:Connect(function()
+                    currentTarget = player
+                    if hiddenPlayers[player] then
+                        HideBtn.Text = "Show"
+                    else
+                        HideBtn.Text = "Hide"
+                    end
+                    
+                    if viewingPlayer == player then
+                        ViewBtn.Text = "Unview"
+                    else
+                        ViewBtn.Text = "View"
+                    end
+                    
+                    if orbitingPlayer == player then
+                        OrbitBtn.Text = "Unorbit"
+                    else
+                        OrbitBtn.Text = "Orbit"
+                    end
+                    
+                    local mousePos = UserInputService:GetMouseLocation()
+                    ActionMenu.Position = UDim2.new(0, mousePos.X, 0, mousePos.Y - 36)
+                    ActionMenu.Visible = true
+                end)
+                
+                Entry.MouseEnter:Connect(function()
+                    Entry.BackgroundColor3 = Color3.fromRGB(56, 56, 57)
+                end)
+                Entry.MouseLeave:Connect(function()
+                    Entry.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+                end)
+            end
+        end
+        
+        local numItems = #Container:GetChildren() - 1
+        Container.CanvasSize = UDim2.new(0, 0, 0, numItems * 49)
+    end
+
+    SearchBar.Changed:Connect(function(prop)
+        if prop == "Text" then
+            updatePlayerList()
+        end
+    end)
+
+    Players.PlayerAdded:Connect(updatePlayerList)
+    Players.PlayerRemoving:Connect(function(player)
+        if currentTarget == player then ActionMenu.Visible = false end
+        if viewingPlayer == player then viewingPlayer = nil workspace.CurrentCamera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid") end
+        if orbitingPlayer == player then if orbitConnection then orbitConnection:Disconnect() orbitConnection = nil end orbitingPlayer = nil end
+        hiddenPlayers[player] = nil
+        if hiddenConnections[player] then hiddenConnections[player]:Disconnect() hiddenConnections[player] = nil end
+        updatePlayerList()
+    end)
+
+    UserInputService.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if ActionMenu.Visible then
+                local menuPos = ActionMenu.AbsolutePosition
+                local menuSize = ActionMenu.AbsoluteSize
+                local mousePos = UserInputService:GetMouseLocation()
+                if mousePos.X < menuPos.X or mousePos.X > menuPos.X + menuSize.X or mousePos.Y < menuPos.Y or mousePos.Y > menuPos.Y + menuSize.Y then
+                    ActionMenu.Visible = false
+                end
+            end
+        end
+    end)
+
+    ViewBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        if viewingPlayer == currentTarget then
+            viewingPlayer = nil
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                workspace.CurrentCamera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            end
+        else
+            viewingPlayer = currentTarget
+        end
+    end)
+
+    TPBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget or not currentTarget.Character then return end
+        local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local targetRoot = currentTarget.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot and targetRoot then
+            myRoot.CFrame = targetRoot.CFrame
+        end
+    end)
+
+    OrbitBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        if orbitingPlayer == currentTarget then
+            if orbitConnection then orbitConnection:Disconnect() orbitConnection = nil end
+            orbitingPlayer = nil
+        else
+            if orbitConnection then orbitConnection:Disconnect() orbitConnection = nil end
+            orbitingPlayer = currentTarget
+            local angle = 0
+            orbitConnection = RunService.Heartbeat:Connect(function()
+                if not orbitingPlayer or not orbitingPlayer.Character then
+                    if orbitConnection then orbitConnection:Disconnect() orbitConnection = nil end
+                    orbitingPlayer = nil
+                    return
+                end
+                local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local targetRoot = orbitingPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if myRoot and targetRoot then
+                    angle = angle + 0.05
+                    local offset = Vector3.new(math.sin(angle) * 5, 0, math.cos(angle) * 5)
+                    myRoot.CFrame = CFrame.new(targetRoot.Position + offset, targetRoot.Position)
+                end
+            end)
+        end
+    end)
+
+    CopyIDBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        local clip = getClipboardFunction()
+        if clip then clip(tostring(currentTarget.UserId)) end
+    end)
+
+    CopyUserBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        local clip = getClipboardFunction()
+        if clip then clip(currentTarget.Name) end
+    end)
+
+    CopyDisplayBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        local clip = getClipboardFunction()
+        if clip then clip(currentTarget.DisplayName) end
+    end)
+
+    HideBtn.MouseButton1Click:Connect(function()
+        ActionMenu.Visible = false
+        if not currentTarget then return end
+        if hiddenPlayers[currentTarget] then
+            hiddenPlayers[currentTarget] = nil
+            removeHide(currentTarget)
+            if hiddenConnections[currentTarget] then
+                hiddenConnections[currentTarget]:Disconnect()
+                hiddenConnections[currentTarget] = nil
+            end
+        else
+            hiddenPlayers[currentTarget] = true
+            applyHide(currentTarget)
+            hiddenConnections[currentTarget] = currentTarget.CharacterAdded:Connect(function(char)
+                applyHide(currentTarget)
+            end)
+        end
+    end)
+
+    updatePlayerList()
 end)
 
 autoclicking = false
@@ -13626,13 +14502,6 @@ addcmd("guiscale", {}, function(args, speaker)
     updatesaves()
 end)
 
--- Auto runs on startup: 100 if on mobile, 160 if on PC
-if IsOnMobile then
-    execCmd("guiscale 100")
-else
-    execCmd("guiscale 160")
-end
-
 addcmd("muteallvoices", {"muteallvcs"}, function(args, speaker)
 	Services.VoiceChatInternal:SubscribePauseAll(true)
 end)
@@ -14251,4 +15120,4 @@ elseif check("Delta") or check("Codex") or check("ArceusX") or check("Cryptic") 
 else
     notify("Executor Status", "Your executor is supported! " .. execName)
 end
-notify('guiscale is automatically set to 160% for Pc,you can change with command guiscale [number]')
+notify('Thank you for using Eternal Yield 💕')
