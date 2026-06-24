@@ -369,7 +369,7 @@ if makefolder and isfolder and writefile and isfile then
 	end)
 end
 
-currentVersion = "7.0"
+currentVersion = "7.1.2"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -4677,7 +4677,8 @@ function autoComplete(str,curText)
 	Cmdbar.Text = Cmdbar.Text:gsub( '\t', '' )
 	Cmdbar.CursorPosition = #Cmdbar.Text+1--1020
 end
--- whole list, do not delete any!
+
+-- cmds
 CMDs = {}
 CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Infinite Yield discord server.'}
 CMDs[#CMDs + 1] = {NAME = 'guiscale [number]', DESC = 'Changes the size of the gui. [number] accepts decimals and whole numbers. Min is 0.4 and Max is 2'}
@@ -4717,6 +4718,7 @@ CMDs[#CMDs + 1] = {NAME = 'hideguis', DESC = 'Hides any GUIs in PlayerGui'}
 CMDs[#CMDs + 1] = {NAME = 'unhideguis', DESC = 'Undoes hideguis'}
 CMDs[#CMDs + 1] = {NAME = 'guidelete', DESC = 'Enables backspace to delete GUI'}
 CMDs[#CMDs + 1] = {NAME = 'unguidelete / noguidelete', DESC = 'Disables guidelete'}
+CMDs[#CMDs + 1] = {NAME = 'c00lgui', DESC = 'Loads coolkid gui (clientsided)'}
 CMDs[#CMDs + 1] = {NAME = 'hideEY', DESC = 'Hides the main EY GUI'}
 CMDs[#CMDs + 1] = {NAME = 'showEY / unhideEY', DESC = 'Shows EY again'}
 CMDs[#CMDs + 1] = {NAME = 'keepEY', DESC = 'Auto execute EY when you teleport through servers'}
@@ -4834,6 +4836,7 @@ CMDs[#CMDs + 1] = {NAME = 'logs', DESC = 'Opens the logs GUI'}
 CMDs[#CMDs + 1] = {NAME = 'chatlogs / clogs', DESC = 'Log what people say or whisper'}
 CMDs[#CMDs + 1] = {NAME = 'joinlogs / jlogs', DESC = 'Log when people join'}
 CMDs[#CMDs + 1] = {NAME = 'chatlogswebhook / logswebhook [url]', DESC = 'Set a discord webhook for chatlogs to go to (provide no url to disable this)'}
+CMDs[#CMDs + 1] = {NAME = 'webhook / whook', DESC = 'Opens a GUI to configurate webhook stuff'}
 CMDs[#CMDs + 1] = {NAME = 'chat / say [text]', DESC = 'Makes you chat a string (possible mute bypass)'}
 CMDs[#CMDs + 1] = {NAME = 'spam [text]', DESC = 'Makes you spam the chat'}
 CMDs[#CMDs + 1] = {NAME = 'unspam', DESC = 'Turns off spam'}
@@ -4902,10 +4905,11 @@ CMDs[#CMDs + 1] = {NAME = 'maxzoom [num]', DESC = 'Maximum camera zoom'}
 CMDs[#CMDs + 1] = {NAME = 'minzoom [num]', DESC = 'Minimum camera zoom'}
 CMDs[#CMDs + 1] = {NAME = 'camdistance [num]', DESC = 'Changes camera distance from your player'}
 CMDs[#CMDs + 1] = {NAME = 'fov [num]', DESC = 'Adjusts field of view (default is 70)'}
+CMDs[#CMDs + 1] = {NAME = 'stretchedres / strech / str [X Y]', DESC = 'Changes your screen resolution'}
 CMDs[#CMDs + 1] = {NAME = 'fixcam / restorecam', DESC = 'Fixes camera'}
 CMDs[#CMDs + 1] = {NAME = 'enableshiftlock / enablesl', DESC = 'Enables the shift lock option'}
 CMDs[#CMDs + 1] = {NAME = 'lookat [player]', DESC = 'Moves your camera view to a player'}
-CMDs[#CMDs + 1] = {NAME = 'stretchedres / strech / str [X] [Y]', DESC = 'Changes your screen resolution'}
+
 CMDs[#CMDs + 1] = {NAME = '', DESC = ''}
 CMDs[#CMDs + 1] = {NAME = 'btools (CLIENT)', DESC = 'Gives you building tools (DOES NOT REPLICATE)'}
 CMDs[#CMDs + 1] = {NAME = 'f3x (CLIENT)', DESC = 'Gives you F3X building tools (DOES NOT REPLICATE)'}
@@ -4955,6 +4959,8 @@ CMDs[#CMDs + 1] = {NAME = 'nofog (CLIENT)', DESC = 'Removes fog'}
 CMDs[#CMDs + 1] = {NAME = 'brightness [num] (CLIENT)', DESC = 'Changes the brightness lighting property'}
 CMDs[#CMDs + 1] = {NAME = 'globalshadows / gshadows (CLIENT)', DESC = 'Enables global shadows'}
 CMDs[#CMDs + 1] = {NAME = 'noglobalshadows / nogshadows (CLIENT)', DESC = 'Disables global shadows'}
+CMDs[#CMDs + 1] = {NAME = 'headless (CLIENT)', DESC = 'Removes your head free'}
+CMDs[#CMDs + 1] = {NAME = 'korblox (CLIENT)', DESC = 'Gives you free korblox'}
 CMDs[#CMDs + 1] = {NAME = 'restorelighting / rlighting', DESC = 'Restores Lighting properties'}
 CMDs[#CMDs + 1] = {NAME = 'light [radius] [brightness] (CLIENT)', DESC = 'Gives your player dynamic light'}
 CMDs[#CMDs + 1] = {NAME = 'nolight / unlight', DESC = 'Removes dynamic light from your player'}
@@ -4965,6 +4971,7 @@ CMDs[#CMDs + 1] = {NAME = 'chatage [player]', DESC = 'Chats the age of a player'
 CMDs[#CMDs + 1] = {NAME = 'joindate / jd [player]', DESC = 'Tells you the date the player joined Roblox'}
 CMDs[#CMDs + 1] = {NAME = 'chatjoindate / cjd [player]', DESC = 'Chats the date the player joined Roblox'}
 CMDs[#CMDs + 1] = {NAME = 'copyname / copyuser [player]', DESC = 'Copies a players full username to your clipboard'}
+CMDs[#CMDs + 1] = {NAME = 'rename / rname [plr] [name]', DESC = 'Renames locally a player'}
 CMDs[#CMDs + 1] = {NAME = 'userid / id [player]', DESC = 'Notifies a players user ID'}
 CMDs[#CMDs + 1] = {NAME = 'copyplaceid / placeid', DESC = 'Copies the current place id to your clipboard'}
 CMDs[#CMDs + 1] = {NAME = 'copygameid / gameid', DESC = 'Copies the current game id to your clipboard'}
@@ -5018,7 +5025,7 @@ CMDs[#CMDs + 1] = {NAME = 'unmuteboombox [player]', DESC = 'Unmutes someones boo
 CMDs[#CMDs + 1] = {NAME = 'hitbox [player] [size] [transparency]', DESC = 'Expands the hitbox for players HumanoidRootPart (default is 1)'}
 CMDs[#CMDs + 1] = {NAME = 'headsize [player] [size]', DESC = 'Expands the head size for players Head (default is 1)'}
 CMDs[#CMDs + 1] = {NAME = '', DESC = ''}
-CMDs[#CMDs + 1] = {NAME = 'reset', DESC = 'Resets your character normally'}
+CMDs[#CMDs + 1] = {NAME = 'reset / rst', DESC = 'Resets your character normally'}
 CMDs[#CMDs + 1] = {NAME = 'respawn', DESC = 'Respawns you'}
 CMDs[#CMDs + 1] = {NAME = 'refresh / re', DESC = 'Respawns and brings you back to the same position'}
 CMDs[#CMDs + 1] = {NAME = 'god', DESC = 'Makes your character difficult to kill in most games'}
@@ -5105,8 +5112,6 @@ CMDs[#CMDs + 1] = {NAME = 'undance', DESC = 'Stops dance animations'}
 CMDs[#CMDs + 1] = {NAME = 'spasm', DESC = 'Makes you  c r a z y'}
 CMDs[#CMDs + 1] = {NAME = 'unspasm', DESC = 'Stops spasm'}
 CMDs[#CMDs + 1] = {NAME = 'headthrow', DESC = 'Simply makes you throw your head'}
-CMDs[#CMDs + 1] = {NAME = 'headless (CLIENT)', DESC = 'Removes your head free'}
-CMDs[#CMDs + 1] = {NAME = 'korblox (CLIENT)', DESC = 'Gives you free korblox'}
 CMDs[#CMDs + 1] = {NAME = 'noanim', DESC = 'Disables your animations'}
 CMDs[#CMDs + 1] = {NAME = 'reanim', DESC = 'Restores your animations'}
 CMDs[#CMDs + 1] = {NAME = 'animationbreaker / animbreak / abreak [breaker] [jitter]', DESC = 'Breaks your animations first num for breaker and second num for jitter'}
@@ -8147,6 +8152,11 @@ addcmd('unguidelete',{'noguidelete'},function(args, speaker)
 	notify('GUI Delete Disabled','GUI backspace delete has been disabled')
 end)
 
+addcmd('c00lgui',{},function(args, speaker)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/c00lgui"))()
+	notify('Coolkidd', 'Hold on a sec the script is visual btw')
+end)
+
 local wasStayOpen = StayOpen
 addcmd('hideEY',{},function(args, speaker)
 	isHidden = true
@@ -8568,7 +8578,7 @@ end)
 addcmd('tracers', {}, function()
     TracersEnabled = true
     TracersTeamCheck = false
-    notify('Tracers', 'Enabled (White)')
+    notify('Tracers', 'Enabled')
 end)
 
 addcmd('untracers', {}, function()
@@ -8590,7 +8600,7 @@ end)
 addcmd('boxes', {}, function()
     BoxesEnabled = true
     BoxesTeamCheck = false
-    notify('Boxes', 'Enabled (White)')
+    notify('Boxes', 'Enabled')
 end)
 
 addcmd('unboxes', {}, function()
@@ -9362,6 +9372,47 @@ addcmd('copyname',{'copyuser'},function(args, speaker)
 	end
 end)
 
+addcmd('rename',{'rname'},function(args, speaker)
+    local Players = game:GetService("Players")
+    if not args[1] or not args[2] then return end
+    
+    local search = string.lower(args[1])
+    local targetPlayer = nil
+    
+    for _, p in ipairs(Players:GetPlayers()) do
+        if string.find(string.lower(p.Name), search) or string.find(string.lower(p.DisplayName), search) then
+            targetPlayer = p
+            break
+        end
+    end
+    
+    if targetPlayer then
+        local newName = table.concat(args, " ", 2)
+        
+        local function updateText(label)
+            if label:IsA("TextLabel") then
+                if label.Text == targetPlayer.DisplayName then
+                    label.Text = newName
+                elseif label.Text == targetPlayer.Name then
+                    label.Text = newName
+                elseif label.Text == "@" .. targetPlayer.Name then
+                    label.Text = "@" .. newName
+                end
+            end
+        end
+        
+        for _, descendant in ipairs(game:GetService("CoreGui"):GetDescendants()) do
+            updateText(descendant)
+        end
+        
+        game:GetService("CoreGui").DescendantAdded:Connect(function(descendant)
+            task.defer(function()
+                updateText(descendant)
+            end)
+        end)
+    end
+end)
+
 addcmd('userid',{'id'},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
 	for i,v in pairs(players) do
@@ -9963,7 +10014,7 @@ addcmd('infrontweld', {'iweld'}, function(args, speaker)
                 local player_root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                 local target_root = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
                 if player_root and target_root then
-                    player_root.CFrame = target_root.CFrame * CFrame.new(0, 0, -1.5)
+                    player_root.CFrame = target_root.CFrame * CFrame.new(0, 0, -2.1)
                     player_root.Velocity = Vector3.zero
                     if sethiddenproperty then
                         pcall(sethiddenproperty, player_root, "PhysicsRepRootPart", target_root)
@@ -10030,7 +10081,7 @@ addcmd('unmuteboombox',{},function(args, speaker)
 	end
 end)
 
-addcmd("reset", {}, function(args, speaker)
+addcmd("reset", {"rst"}, function(args, speaker)
 	local humanoid = speaker.Character and speaker.Character:FindFirstChildWhichIsA("Humanoid")
 	if humanoid then
 		humanoid:ChangeState(Enum.HumanoidStateType.Dead)
@@ -12964,6 +13015,379 @@ addcmd("chatlogswebhook", {"logswebhook"}, function(args, speaker)
 	updatesaves()
 end)
 
+addcmd('webhook',{'whook'},function(args, speaker)
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local UserInputService = game:GetService("UserInputService")
+    local HttpService = game:GetService("HttpService")
+    local LocalPlayer = Players.LocalPlayer
+
+    local targetParent = nil
+    local coreGuiSuccess, coreGuiError = pcall(function()
+        targetParent = game:GetService("CoreGui"):FindFirstChild("RobloxGui") or game:GetService("CoreGui")
+    end)
+    if not coreGuiSuccess or not targetParent then
+        targetParent = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    end
+
+    local existingGui = targetParent:FindFirstChild("EternalYield_WebhookGui")
+    if existingGui then
+        local mainFrame = existingGui:FindFirstChild("MainFrame")
+        if mainFrame then
+            if mainFrame.Visible then
+                mainFrame.Visible = false
+            else
+                mainFrame.Position = UDim2.new(0.5, -210, 0.5, -190)
+                mainFrame.Visible = true
+            end
+        end
+        return
+    end
+
+    local httpReq = request or http_request or (syn and syn.request)
+    local webhookUrl = ""
+    local webhookEnabled = false
+    local logDeath = false
+    local logChatted = false
+    local logJoin = false
+    local logLeft = false
+    local logRespawn = false
+    local avatarcache = {}
+    local ignoredNames = {}
+
+    local WH_Gui = Instance.new("ScreenGui")
+    WH_Gui.Name = "EternalYield_WebhookGui"
+    WH_Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    WH_Gui.ResetOnSpawn = false
+    WH_Gui.Parent = targetParent
+
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = WH_Gui
+    MainFrame.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Position = UDim2.new(0.5, -210, 0.5, -190)
+    MainFrame.Size = UDim2.new(0, 420, 0, 380)
+    MainFrame.Visible = true
+
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Name = "TitleBar"
+    TitleBar.Parent = MainFrame
+    TitleBar.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Name = "TitleLabel"
+    TitleLabel.Parent = TitleBar
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+    TitleLabel.Size = UDim2.new(1, -40, 1, 0)
+    TitleLabel.Font = Enum.Font.SourceSansBold
+    TitleLabel.Text = "Customize Webhook"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = 16
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Name = "CloseButton"
+    CloseButton.Parent = TitleBar
+    CloseButton.BackgroundTransparency = 1
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)
+    CloseButton.Size = UDim2.new(0, 30, 0, 30)
+    CloseButton.Font = Enum.Font.SourceSansBold
+    CloseButton.Text = "X"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 16
+
+    local ContentContainer = Instance.new("Frame")
+    ContentContainer.Name = "ContentContainer"
+    ContentContainer.Parent = MainFrame
+    ContentContainer.BackgroundTransparency = 1
+    ContentContainer.Position = UDim2.new(0, 10, 0, 40)
+    ContentContainer.Size = UDim2.new(1, -20, 1, -50)
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = ContentContainer
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 6)
+
+    local UrlInput = Instance.new("TextBox")
+    UrlInput.Name = "UrlInput"
+    UrlInput.Parent = ContentContainer
+    UrlInput.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    UrlInput.BorderSizePixel = 0
+    UrlInput.Size = UDim2.new(1, 0, 0, 30)
+    UrlInput.Font = Enum.Font.SourceSans
+    UrlInput.PlaceholderText = "Paste Webhook URL Here..."
+    UrlInput.Text = ""
+    UrlInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    UrlInput.TextSize = 14
+    UrlInput.LayoutOrder = 1
+    UrlInput.ClipsDescendants = true
+
+    local EnabledRow = Instance.new("Frame")
+    EnabledRow.Name = "EnabledRow"
+    EnabledRow.BackgroundTransparency = 1
+    EnabledRow.Size = UDim2.new(1, 0, 0, 30)
+    EnabledRow.LayoutOrder = 2
+    EnabledRow.Parent = ContentContainer
+
+    local EnabledButton = Instance.new("TextButton")
+    EnabledButton.Name = "EnabledButton"
+    EnabledButton.Parent = EnabledRow
+    EnabledButton.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    EnabledButton.BorderSizePixel = 0
+    EnabledButton.Size = UDim2.new(0, 30, 0, 30)
+    EnabledButton.Font = Enum.Font.SourceSansBold
+    EnabledButton.Text = ""
+    EnabledButton.TextColor3 = Color3.fromRGB(20, 20, 20)
+    EnabledButton.TextSize = 18
+
+    local EnabledLabel = Instance.new("TextLabel")
+    EnabledLabel.Name = "EnabledLabel"
+    EnabledLabel.Parent = EnabledRow
+    EnabledLabel.BackgroundTransparency = 1
+    EnabledLabel.Position = UDim2.new(0, 40, 0, 0)
+    EnabledLabel.Size = UDim2.new(1, -40, 1, 0)
+    EnabledLabel.Font = Enum.Font.SourceSans
+    EnabledLabel.Text = "Enabled"
+    EnabledLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    EnabledLabel.TextSize = 14
+    EnabledLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    EnabledButton.MouseButton1Click:Connect(function()
+        webhookEnabled = not webhookEnabled
+        if webhookEnabled then
+            EnabledButton.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
+            EnabledButton.Text = "✓"
+        else
+            EnabledButton.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+            EnabledButton.Text = ""
+        end
+    end)
+
+    local IgnoreInput = Instance.new("TextBox")
+    IgnoreInput.Name = "IgnoreInput"
+    IgnoreInput.Parent = ContentContainer
+    IgnoreInput.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+    IgnoreInput.BorderSizePixel = 0
+    IgnoreInput.Size = UDim2.new(1, 0, 0, 30)
+    IgnoreInput.Font = Enum.Font.SourceSans
+    IgnoreInput.PlaceholderText = "Ignore Player (Type User/Display and press Enter)..."
+    IgnoreInput.Text = ""
+    IgnoreInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    IgnoreInput.TextSize = 14
+    IgnoreInput.LayoutOrder = 3
+    IgnoreInput.ClipsDescendants = true
+
+    IgnoreInput.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local target = string.lower(string.match(IgnoreInput.Text, "^%s*(.-)%s*$") or "")
+            if target ~= "" then
+                if ignoredNames[target] then
+                    ignoredNames[target] = nil
+                else
+                    ignoredNames[target] = true
+                end
+            end
+            IgnoreInput.Text = ""
+        end
+    end)
+
+    local function createToggle(text, order, callback)
+        local row = Instance.new("Frame")
+        row.Name = text .. "Row"
+        row.BackgroundTransparency = 1
+        row.Size = UDim2.new(1, 0, 0, 30)
+        row.LayoutOrder = order
+        row.Parent = ContentContainer
+
+        local button = Instance.new("TextButton")
+        button.Name = "ToggleButton"
+        button.Parent = row
+        button.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+        button.BorderSizePixel = 0
+        button.Size = UDim2.new(0, 30, 0, 30)
+        button.Font = Enum.Font.SourceSansBold
+        button.Text = ""
+        button.TextColor3 = Color3.fromRGB(85, 255, 127)
+        button.TextSize = 18
+
+        local label = Instance.new("TextLabel")
+        label.Name = "ToggleLabel"
+        label.Parent = row
+        label.BackgroundTransparency = 1
+        label.Position = UDim2.new(0, 40, 0, 0)
+        label.Size = UDim2.new(1, -40, 1, 0)
+        label.Font = Enum.Font.SourceSans
+        label.Text = text
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.TextSize = 14
+        label.TextXAlignment = Enum.TextXAlignment.Left
+
+        local state = false
+        button.MouseButton1Click:Connect(function()
+            state = not state
+            if state then
+                button.Text = "✓"
+            else
+                button.Text = ""
+            end
+            callback(state)
+        end)
+    end
+
+    createToggle("On Death", 4, function(v) logDeath = v end)
+    createToggle("On Chatted", 5, function(v) logChatted = v end)
+    createToggle("On Join", 6, function(v) logJoin = v end)
+    createToggle("On Left", 7, function(v) logLeft = v end)
+    createToggle("On Respawn", 8, function(v) logRespawn = v end)
+
+    UrlInput.Changed:Connect(function(prop)
+        if prop == "Text" then
+            webhookUrl = UrlInput.Text
+        end
+    end)
+
+    local dragging, dragInput, dragStart, startPos
+    TitleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    TitleBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    CloseButton.MouseButton1Click:Connect(function()
+        MainFrame.Visible = false
+    end)
+
+    local function isIgnored(player)
+        if not player then return false end
+        local nameLower = string.lower(player.Name)
+        local displayLower = string.lower(player.DisplayName)
+        return ignoredNames[nameLower] or ignoredNames[displayLower]
+    end
+
+    local function sendWebhook(payload)
+        if not httpReq or webhookUrl == "" or not webhookEnabled then return end
+        pcall(function()
+            httpReq({
+                Url = webhookUrl,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+    end
+
+    local function sendChatWebhook(player, message)
+        if not webhookEnabled or not logChatted or isIgnored(player) or webhookUrl == "" or not httpReq then return end
+        local id = player.UserId
+        local avatar = avatarcache[id]
+        if not avatar then
+            local success, res = pcall(function()
+                return httpReq({
+                    Url = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" .. id .. "&size=420x420&format=Png&isCircular=false",
+                    Method = "GET"
+                }).Body
+            end)
+            if success and res then
+                local dataSuccess, decoded = pcall(function() return HttpService:JSONDecode(res)["data"] end)
+                if dataSuccess and decoded and decoded[1] and decoded[1].state == "Completed" then
+                    avatar = decoded[1].imageUrl
+                end
+            end
+            avatar = avatar or "https://files.catbox.moe/i968v2.jpg"
+            avatarcache[id] = avatar
+        end
+        
+        pcall(function()
+            httpReq({
+                Url = webhookUrl,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode({
+                    content = message,
+                    avatar_url = avatar,
+                    username = player.DisplayName .. " (@" .. player.Name .. ")",
+                    allowed_mentions = {parse = {}}
+                })
+            })
+        end)
+    end
+
+    local function hookPlayer(player)
+        player.Chatted:Connect(function(msg)
+            if webhookEnabled and logChatted and not isIgnored(player) then
+                sendChatWebhook(player, msg)
+            end
+        end)
+        
+        player.CharacterAdded:Connect(function(char)
+            if webhookEnabled and logRespawn and not isIgnored(player) then
+                sendWebhook({content = player.DisplayName .. " (@" .. player.Name .. ") has respawned."})
+            end
+            
+            local humanoid = char:WaitForChild("Humanoid", 5)
+            if humanoid then
+                humanoid.Died:Connect(function()
+                    if webhookEnabled and logDeath and not isIgnored(player) then
+                        sendWebhook({content = player.DisplayName .. " (@" .. player.Name .. ") has died/reset."})
+                    end
+                end)
+            end
+        end)
+
+        if player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.Died:Connect(function()
+                    if webhookEnabled and logDeath and not isIgnored(player) then
+                        sendWebhook({content = player.DisplayName .. " (@" .. player.Name .. ") has died/reset."})
+                    end
+                end)
+            end
+        end
+    end
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        hookPlayer(p)
+    end
+
+    Players.PlayerAdded:Connect(function(player)
+        if webhookEnabled and logJoin and not isIgnored(player) then
+            sendWebhook({content = player.DisplayName .. " (@" .. player.Name .. ") has joined the server."})
+        end
+        hookPlayer(player)
+    end)
+
+    Players.PlayerRemoving:Connect(function(player)
+        if webhookEnabled and logLeft and not isIgnored(player) then
+            sendWebhook({content = player.DisplayName .. " (@" .. player.Name .. ") has left the server."})
+        end
+    end)
+end)
+
 flinging = false
 addcmd('fling',{},function(args, speaker)
 	flinging = false
@@ -14435,14 +14859,14 @@ addcmd("unlistento", {}, function(args, speaker)
 	listentoChar:Disconnect()
 end)
 
-addcmd("jerk", {}, function(args, speaker)
+addcmd("jerk", {"goon"}, function(args, speaker)
 	local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
 	local backpack = speaker:FindFirstChildWhichIsA("Backpack")
 	if not humanoid or not backpack then return end
 
 	local tool = Instance.new("Tool")
 	tool.Name = "Jerk Off"
-	tool.ToolTip = "in the stripped club. straight up \"jorking it\" . and IY \"it\" , haha, well. let's justr say. My peanits."
+	tool.ToolTip = "in the stripped club. straight up \"jorking it\" and by \"it\" , haha, well. let's justr say. My peanits."
 	tool.RequiresHandle = false
 	tool.Parent = backpack
 
@@ -14980,7 +15404,7 @@ end)
 
 task.spawn(function()
 	local success, latestVersionInfo = pcall(function() 
-		local versionJson = game:HttpGet("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/version.lua")
+		local versionJson = game:HttpGet("https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/version")
 		return HttpService:JSONDecode(versionJson)
 	end)
 
