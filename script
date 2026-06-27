@@ -15478,7 +15478,7 @@ task.spawn(function()
 
 	if success then
 		if currentVersion ~= latestVersionInfo.Version then
-			notify("Outdated", "Get the new version at eternalyield.netlify.app")
+			notify("Outdated", "You are on the wrong version, please get it from https://raw.githubusercontent.com/Scxrpt/eternalyield/refs/heads/main/script")
 		end
 
 		if latestVersionInfo.Announcement and latestVersionInfo.Announcement ~= "" then
