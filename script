@@ -369,7 +369,7 @@ if makefolder and isfolder and writefile and isfile then
 	end)
 end
 
-currentVersion = "7.1.2"
+currentVersion = "7.1.3"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -4901,6 +4901,8 @@ CMDs[#CMDs + 1] = {NAME = 'tweengotocam / tgotocam', DESC = 'Tweens you to the l
 CMDs[#CMDs + 1] = {NAME = 'firstp', DESC = 'Forces camera to go into first person'}
 CMDs[#CMDs + 1] = {NAME = 'thirdp', DESC = 'Allows camera to go into third person'}
 CMDs[#CMDs + 1] = {NAME = 'noclipcam / nccam', DESC = 'Allows camera to go through objects like walls'}
+CMDs[#CMDs + 1] = {NAME = 'headbob / hb', DESC = 'Smoothly follows your head'}
+CMDs[#CMDs + 1] = {NAME = 'unheadbob / uhb', DESC = 'Removes headbob'}
 CMDs[#CMDs + 1] = {NAME = 'maxzoom [num]', DESC = 'Maximum camera zoom'}
 CMDs[#CMDs + 1] = {NAME = 'minzoom [num]', DESC = 'Minimum camera zoom'}
 CMDs[#CMDs + 1] = {NAME = 'camdistance [num]', DESC = 'Changes camera distance from your player'}
@@ -9123,6 +9125,34 @@ addcmd('noclipcam', {'nccam'}, function(args, speaker)
 	end
 end)
 
+addcmd('headbob', {'hb'}, function(args, speaker)
+    if getgenv().SmoothCamLoop then
+        getgenv().SmoothCamLoop:Disconnect()
+        getgenv().SmoothCamLoop = nil
+        return
+    end
+
+    getgenv().SmoothCamLoop = RunService.RenderStepped:Connect(function()
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if root then
+            local speed = root.Velocity.Magnitude
+            if speed > 0.5 then
+                local camera = workspace.CurrentCamera
+                local bob = math.sin(tick() * 12) * (0.15 * math.min(speed / 16, 1))
+                camera.CFrame = camera.CFrame * CFrame.new(0, bob, 0)
+            end
+        end
+    end)
+end)
+
+addcmd('unheadbob', {'uhb'}, function(args, speaker)
+    if getgenv().SmoothCamLoop then
+        getgenv().SmoothCamLoop:Disconnect()
+        getgenv().SmoothCamLoop = nil
+    end
+end)
+
 addcmd('maxzoom',{},function(args, speaker)
 	speaker.CameraMaxZoomDistance = args[1]
 end)
@@ -9962,7 +9992,7 @@ addcmd('backweld', {'bweld', 'weld'}, function(args, speaker)
                 local player_root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                 local target_root = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
                 if player_root and target_root then
-                    player_root.CFrame = target_root.CFrame * CFrame.new(0, 0, 3)
+                    player_root.CFrame = target_root.CFrame * CFrame.new(0, 0, 3.2)
                     player_root.Velocity = Vector3.zero
                     if sethiddenproperty then
                         pcall(sethiddenproperty, player_root, "PhysicsRepRootPart", target_root)
@@ -15582,4 +15612,4 @@ elseif check("Delta") or check("Codex") or check("ArceusX") or check("Cryptic") 
 else
     notify("Executor Status", "Your executor is supported! " .. execName)
 end
-notify('Thank you for using Eternal Yield 💕')
+notify('Script last updated: 6/27/2026 at 2:06 PM')
